@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Calendar, HeartPulse, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, Calendar, HeartPulse, User, Check, Edit3, X } from "lucide-react";
 
 interface TimelineConfigBarProps {
   currentBirthDate: string;
@@ -14,88 +15,159 @@ export default function TimelineConfigBar({
   currentExpectedLife,
   onUpdate,
 }: TimelineConfigBarProps) {
-  const [birthDate, setBirthDate] = useState(currentBirthDate);
-  const [expectedLife, setExpectedLife] = useState(currentExpectedLife);
-  const [isOpen, setIsOpen] = useState(false);
+  const computeAgeFromBirthDate = (bDateStr: string): number => {
+    const bDate = new Date(bDateStr);
+    const now = new Date();
+    let years = now.getFullYear() - bDate.getFullYear();
+    if (
+      now.getMonth() < bDate.getMonth() ||
+      (now.getMonth() === bDate.getMonth() && now.getDate() < bDate.getDate())
+    ) {
+      years--;
+    }
+    return Math.max(0, years);
+  };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    onUpdate(birthDate, Number(expectedLife));
-    setIsOpen(false);
+  const [age, setAge] = useState<number>(computeAgeFromBirthDate(currentBirthDate));
+  const [expectedLife, setExpectedLife] = useState<number>(currentExpectedLife);
+  const [birthDate, setBirthDate] = useState<string>(currentBirthDate);
+  const [isConfigured, setIsConfigured] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState<boolean>(true);
+
+  useEffect(() => {
+    const savedBirth = localStorage.getItem("memento_user_birth_date");
+    if (savedBirth) {
+      setIsConfigured(true);
+      setIsVisible(false); // Hide by default if already configured!
+    }
+  }, []);
+
+  const handleAgeChange = (newAge: number) => {
+    setAge(newAge);
+    const now = new Date();
+    const birthYear = now.getFullYear() - newAge;
+    const monthStr = String(now.getMonth() + 1).padStart(2, "0");
+    const dayStr = String(now.getDate()).padStart(2, "0");
+    const calculatedBirthDate = `${birthYear}-${monthStr}-${dayStr}`;
+    setBirthDate(calculatedBirthDate);
+    onUpdate(calculatedBirthDate, expectedLife);
+  };
+
+  const handleBirthDateChange = (newBirthDate: string) => {
+    setBirthDate(newBirthDate);
+    const newAge = computeAgeFromBirthDate(newBirthDate);
+    setAge(newAge);
+    onUpdate(newBirthDate, expectedLife);
+  };
+
+  const handleLifeChange = (newExpectedLife: number) => {
+    setExpectedLife(newExpectedLife);
+    onUpdate(birthDate, newExpectedLife);
+  };
+
+  const handleApplyAndHide = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsConfigured(true);
+    setIsVisible(false);
   };
 
   return (
-    <div className="w-full rounded-2xl border border-neutral-800 bg-neutral-950/90 p-4 sm:p-5 backdrop-blur-md transition-all">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900 text-white">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div>
-            <h3 className="text-xs uppercase tracking-widest text-white font-semibold">
-              Personalized Timeline Parameters
-            </h3>
-            <p className="text-xs text-neutral-400 font-light mt-0.5">
-              Born: <span className="font-mono text-neutral-200">{birthDate}</span> &bull; Target Horizon: <span className="font-mono text-neutral-200">{expectedLife} Years</span>
-            </p>
-          </div>
-        </div>
+    <div className="w-full">
+      <AnimatePresence mode="wait">
+        {isVisible ? (
+          <motion.div
+            key="config-banner"
+            initial={{ opacity: 0, height: 0, scale: 0.98 }}
+            animate={{ opacity: 1, height: "auto", scale: 1 }}
+            exit={{ opacity: 0, height: 0, scale: 0.98 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950/90 p-5 sm:p-6 backdrop-blur-md shadow-2xl"
+          >
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900 text-white">
+                  <Sparkles className="h-5 w-5 text-white animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold tracking-wide text-white uppercase">
+                    Enter Your Age to See Your Live Countdown
+                  </h3>
+                  <p className="text-xs text-neutral-400 font-light mt-0.5">
+                    No signup required. Instant real-time calculation.
+                  </p>
+                </div>
+              </div>
 
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="rounded-full border border-neutral-700 bg-white px-4 py-1.5 text-xs font-semibold text-black hover:bg-neutral-200 transition"
-        >
-          {isOpen ? "Close Editor" : "Set Birth Date & Life Horizon"}
-        </button>
-      </div>
+              {/* Direct Age & Life Expectancy Inputs */}
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                {/* Age Input */}
+                <div className="flex items-center gap-2 rounded-xl border border-neutral-800 bg-black px-3 py-2">
+                  <User className="h-4 w-4 text-neutral-400" />
+                  <span className="text-xs text-neutral-400 font-mono">Age:</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={130}
+                    value={age}
+                    onChange={(e) => handleAgeChange(Number(e.target.value))}
+                    className="w-14 bg-transparent text-sm font-bold font-ticker text-white focus:outline-none text-center"
+                  />
+                  <span className="text-xs text-neutral-500 font-mono">yrs</span>
+                </div>
 
-      {isOpen && (
-        <form onSubmit={handleSave} className="mt-4 border-t border-neutral-900 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="space-y-1">
-            <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-mono">
-              Date of Birth
-            </label>
-            <div className="relative flex items-center">
-              <Calendar className="absolute left-3 h-4 w-4 text-neutral-500" />
-              <input
-                type="date"
-                required
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                className="w-full rounded-xl border border-neutral-800 bg-black py-2 pl-9 pr-3 text-xs text-white focus:border-white focus:outline-none transition"
-              />
+                {/* Target Life Horizon */}
+                <div className="flex items-center gap-2 rounded-xl border border-neutral-800 bg-black px-3 py-2">
+                  <HeartPulse className="h-4 w-4 text-neutral-400" />
+                  <span className="text-xs text-neutral-400 font-mono">Target:</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={150}
+                    value={expectedLife}
+                    onChange={(e) => handleLifeChange(Number(e.target.value))}
+                    className="w-14 bg-transparent text-sm font-bold font-ticker text-white focus:outline-none text-center"
+                  />
+                  <span className="text-xs text-neutral-500 font-mono">yrs</span>
+                </div>
+
+                {/* Confirm & Hide Button */}
+                <button
+                  type="button"
+                  onClick={handleApplyAndHide}
+                  className="flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-black hover:bg-neutral-200 transition"
+                >
+                  <Check className="h-4 w-4" />
+                  <span>Done</span>
+                </button>
+              </div>
             </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-mono">
-              Expected Life (Years)
-            </label>
-            <div className="relative flex items-center">
-              <HeartPulse className="absolute left-3 h-4 w-4 text-neutral-500" />
-              <input
-                type="number"
-                required
-                min={1}
-                max={150}
-                value={expectedLife}
-                onChange={(e) => setExpectedLife(Number(e.target.value))}
-                className="w-full rounded-xl border border-neutral-800 bg-black py-2 pl-9 pr-3 text-xs text-white focus:border-white focus:outline-none transition"
-              />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="minimized-bar"
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            className="flex items-center justify-between rounded-xl border border-neutral-900 bg-neutral-950/60 px-4 py-2 text-xs text-neutral-400 font-mono"
+          >
+            <div className="flex items-center gap-3">
+              <span>Age: <strong className="text-white">{age}</strong></span>
+              <span>&bull;</span>
+              <span>Target: <strong className="text-white">{expectedLife} Yrs</strong></span>
+              <span>&bull;</span>
+              <span className="text-neutral-500">Timeline Active</span>
             </div>
-          </div>
 
-          <div className="flex items-end">
             <button
-              type="submit"
-              className="w-full rounded-xl bg-white py-2 text-xs font-semibold text-black hover:bg-neutral-200 transition"
+              onClick={() => setIsVisible(true)}
+              className="flex items-center gap-1.5 rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1 text-[11px] text-neutral-300 hover:text-white hover:border-neutral-700 transition"
             >
-              Update Countdown
+              <Edit3 className="h-3 w-3" />
+              <span>Change Age</span>
             </button>
-          </div>
-        </form>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

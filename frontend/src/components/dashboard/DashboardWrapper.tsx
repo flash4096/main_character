@@ -8,7 +8,7 @@ import RemainingLifeCard from "./RemainingLifeCard";
 import ProgressSection from "./ProgressSection";
 import DailyMemento from "./DailyMemento";
 import DailyQuote from "./DailyQuote";
-import { DashboardData } from "@/types";
+import { DashboardData, CurrentAge, RemainingLife } from "@/types";
 import { getDashboardData } from "@/lib/api";
 
 interface DashboardWrapperProps {
@@ -21,29 +21,64 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
   const [expectedLifeYears, setExpectedLifeYears] = useState<number>(initialData.expected_life_years);
 
   useEffect(() => {
-    // Check local storage for user saved birth date
     const savedBirth = localStorage.getItem("memento_user_birth_date");
     const savedExpectancy = localStorage.getItem("memento_user_life_expectancy");
 
-    if (savedBirth) {
-      setBirthDate(savedBirth);
-    }
-    if (savedExpectancy) {
-      setExpectedLifeYears(Number(savedExpectancy));
-    }
+    const effectiveBirth = savedBirth || birthDate;
+    const effectiveExpectancy = savedExpectancy ? Number(savedExpectancy) : expectedLifeYears;
 
-    if (savedBirth || savedExpectancy) {
-      fetchUpdatedData(savedBirth || birthDate, savedExpectancy ? Number(savedExpectancy) : expectedLifeYears);
-    }
+    setBirthDate(effectiveBirth);
+    setExpectedLifeYears(effectiveExpectancy);
+
+    recalculateMetrics(effectiveBirth, effectiveExpectancy);
   }, []);
 
-  const fetchUpdatedData = async (bDate: string, lifeExp: number) => {
-    try {
-      const updated = await getDashboardData(bDate, lifeExp);
-      setData(updated);
-    } catch (err) {
-      console.error("Failed to update dashboard data:", err);
-    }
+  const recalculateMetrics = (bDateStr: string, expYears: number) => {
+    const now = new Date();
+    const bDate = new Date(bDateStr);
+
+    const targetDays = expYears * 365.2425;
+    const estimatedDeath = new Date(bDate.getTime() + targetDays * 86400 * 1000);
+    const remSeconds = Math.max(0, (estimatedDeath.getTime() - now.getTime()) / 1000);
+    const isGift = remSeconds <= 0;
+
+    const remDeltaMs = Math.max(0, estimatedDeath.getTime() - now.getTime());
+    const totalDaysLeft = Math.floor(remDeltaMs / (86400 * 1000));
+    const remYears = Math.floor(totalDaysLeft / 365);
+    const remMonths = Math.floor((totalDaysLeft % 365) / 30);
+    const remDays = (totalDaysLeft % 365) % 30;
+
+    const diffMs = Math.max(0, now.getTime() - bDate.getTime());
+    const totalSeconds = diffMs / 1000;
+    const totalYears = totalSeconds / (365.2425 * 86400);
+
+    const updatedAge: CurrentAge = {
+      years: Math.max(0, now.getFullYear() - bDate.getFullYear()),
+      months: Math.max(0, now.getMonth() - bDate.getMonth()),
+      days: Math.max(0, now.getDate() - bDate.getDate()),
+      hours: now.getHours(),
+      minutes: now.getMinutes(),
+      seconds: now.getSeconds(),
+      total_seconds: totalSeconds,
+      total_years: totalYears,
+    };
+
+    const updatedRemaining: RemainingLife = {
+      years: remYears,
+      months: remMonths,
+      days: remDays,
+      total_days: totalDaysLeft,
+    };
+
+    setData((prev) => ({
+      ...prev,
+      birth_date: bDateStr,
+      expected_life_years: expYears,
+      current_age: updatedAge,
+      remaining_life: updatedRemaining,
+      remaining_seconds: remSeconds,
+      is_gift: isGift,
+    }));
   };
 
   const handleTimelineUpdate = (newBirthDate: string, newExpectedLife: number) => {
@@ -51,27 +86,37 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
     setExpectedLifeYears(newExpectedLife);
     localStorage.setItem("memento_user_birth_date", newBirthDate);
     localStorage.setItem("memento_user_life_expectancy", newExpectedLife.toString());
-    fetchUpdatedData(newBirthDate, newExpectedLife);
+
+    recalculateMetrics(newBirthDate, newExpectedLife);
+
+    getDashboardData(newBirthDate, newExpectedLife)
+      .then((serverData) => setData(serverData))
+      .catch(() => {});
   };
 
   return (
     <div className="space-y-10">
-      {/* Interactive Timeline Birth Data Configurator */}
+      {/* Timeline Input Bar */}
       <TimelineConfigBar
         currentBirthDate={birthDate}
         currentExpectedLife={expectedLifeYears}
         onUpdate={handleTimelineUpdate}
       />
 
-      {/* 1. Countdown Hero (Largest Element on Page) */}
+      {/* 1. Life Countdown (Hero) */}
       <CountdownHero
-        key={data.remaining_seconds}
+        key={`${birthDate}-${expectedLifeYears}-${data.remaining_seconds}`}
         initialRemainingSeconds={data.remaining_seconds}
         isGift={data.is_gift}
         giftMessage={data.gift_message}
       />
 
-      {/* 2. Grid for Current Age & Expected Remaining Life */}
+      {/* 2. Special Question For You (Placed DIRECTLY UNDER countdown) */}
+      <section>
+        <DailyMemento question={data.question} />
+      </section>
+
+      {/* 3. Grid for Current Age & Expected Remaining Life */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CurrentAgeCard
           key={data.birth_date}
@@ -84,14 +129,13 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
         />
       </section>
 
-      {/* 3. Temporal Milestones (Year, Month, Day Progress Bars) */}
+      {/* 4. Temporal Milestones */}
       <section>
         <ProgressSection initialProgress={data.progress} />
       </section>
 
-      {/* 4. Existential Question (rotates every minute) & Daily Wisdom */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <DailyMemento question={data.question} />
+      {/* 5. Daily Wisdom Quote */}
+      <section>
         <DailyQuote quote={data.quote} />
       </section>
     </div>
