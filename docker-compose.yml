@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: memento_db
+    environment:
+      POSTGRES_DB: memento_db
+      POSTGRES_USER: memento_user
+      POSTGRES_PASSWORD: memento_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./supabase/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U memento_user -d memento_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: memento_backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://memento_user:memento_password@db:5432/memento_db
+      SYNC_DATABASE_URL: postgresql://memento_user:memento_password@db:5432/memento_db
+      SECRET_KEY: super_secret_memento_mori_key_change_in_production_32bytes
+      BACKEND_CORS_ORIGINS: '["http://localhost:3000", "http://127.0.0.1:3000"]'
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: memento_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:
