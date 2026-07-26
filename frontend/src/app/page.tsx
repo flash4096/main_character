@@ -1,4 +1,3 @@
-import Navbar from "@/components/dashboard/Navbar";
 import DashboardWrapper from "@/components/dashboard/DashboardWrapper";
 import Footer from "@/components/dashboard/Footer";
 import { DashboardData } from "@/types";
@@ -69,12 +68,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-black text-white selection:bg-neutral-800">
-      <Navbar />
-
-      <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
-        <DashboardWrapper initialData={data} />
-      </main>
-
+      <DashboardWrapper initialData={data} />
       <Footer />
     </div>
   );
