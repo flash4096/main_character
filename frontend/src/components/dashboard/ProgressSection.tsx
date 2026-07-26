@@ -45,7 +45,6 @@ export default function ProgressSection({ initialProgress }: ProgressSectionProp
     };
 
     updateProgress();
-    // Update every minute as requested
     const interval = setInterval(updateProgress, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -67,30 +66,26 @@ export default function ProgressSection({ initialProgress }: ProgressSectionProp
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.3 }}
-      className="flex flex-col rounded-2xl border border-neutral-800/80 bg-surface/50 p-6 sm:p-8 backdrop-blur-xs"
+      transition={{ duration: 0.4 }}
+      className="space-y-4"
     >
-      <div className="border-b border-neutral-800/80 pb-4 mb-6">
+      <div className="border-b border-neutral-900 pb-3 mb-4">
         <h2 className="text-xs uppercase tracking-widest text-neutral-400 font-semibold">
           Temporal Milestones
         </h2>
-        <p className="text-xs text-neutral-400 font-light mt-0.5">
-          Real-time completion percentage of present cycles
-        </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {progressItems.map((item, idx) => (
-          <div key={item.title} className="space-y-2">
+          <div key={item.title} className="space-y-1.5">
             <div className="flex justify-between items-center text-xs font-mono">
               <span className="text-neutral-300 tracking-wide">{item.title}</span>
-              <span className="text-white font-semibold">{item.percentage.toFixed(2)}%</span>
+              <span className="text-white font-semibold">{item.percentage.toFixed(1)}%</span>
             </div>
 
-            {/* Linear Progress Bar */}
-            <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-neutral-900 border border-neutral-800/50">
+            <div className="relative h-2 w-full overflow-hidden rounded-full bg-neutral-900 border border-neutral-800/50">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${item.percentage}%` }}

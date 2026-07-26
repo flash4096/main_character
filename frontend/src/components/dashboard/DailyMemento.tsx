@@ -29,7 +29,6 @@ export default function DailyMemento({ question: initialQuestion }: DailyMemento
   };
 
   useEffect(() => {
-    // Timer for counting down 30 seconds until next random question
     const timer = setInterval(() => {
       setSecondsUntilNext((prev) => {
         if (prev <= 1) {
@@ -46,12 +45,7 @@ export default function DailyMemento({ question: initialQuestion }: DailyMemento
   if (!currentQuestion) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="group relative overflow-hidden rounded-2xl border border-neutral-800/80 bg-neutral-950/80 p-6 sm:p-8 transition-all hover:border-neutral-700/80 my-4"
-    >
+    <div className="p-6 sm:p-7">
       <div className="flex items-center justify-between border-b border-neutral-900 pb-3 mb-4">
         <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-300 font-semibold">
           <HelpCircle className="h-4 w-4 text-white" />
@@ -71,11 +65,11 @@ export default function DailyMemento({ question: initialQuestion }: DailyMemento
       <AnimatePresence mode="wait">
         <motion.blockquote
           key={currentQuestion.id + currentQuestion.text}
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.4 }}
-          className="text-lg sm:text-xl md:text-2xl font-light text-neutral-100 leading-relaxed tracking-tight my-2"
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.35 }}
+          className="text-base sm:text-lg md:text-xl font-light text-neutral-100 leading-relaxed tracking-tight my-2"
         >
           &ldquo;{currentQuestion.text}&rdquo;
         </motion.blockquote>
@@ -85,6 +79,6 @@ export default function DailyMemento({ question: initialQuestion }: DailyMemento
         <span>Question #{currentQuestion.id}</span>
         <span className="capitalize text-neutral-400">{currentQuestion.category || "existential"}</span>
       </div>
-    </motion.div>
+    </div>
   );
 }

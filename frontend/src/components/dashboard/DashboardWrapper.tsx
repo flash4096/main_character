@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import TimelineConfigBar from "./TimelineConfigBar";
 import LifeClock from "./LifeClock";
 import CountdownHero from "./CountdownHero";
-import CurrentAgeCard from "./CurrentAgeCard";
-import RemainingLifeCard from "./RemainingLifeCard";
 import ProgressSection from "./ProgressSection";
 import DailyMemento from "./DailyMemento";
 import DailyQuote from "./DailyQuote";
@@ -96,57 +94,59 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
   };
 
   return (
-    <div className="space-y-12">
-      {/* 1. Timeline Input Bar */}
+    <div className="space-y-4 max-w-7xl mx-auto py-2">
+      {/* Discreet Config Trigger Bar */}
       <TimelineConfigBar
         currentBirthDate={birthDate}
         currentExpectedLife={expectedLifeYears}
         onUpdate={handleTimelineUpdate}
       />
 
-      {/* 2. LIFE CLOCK (Circular Life Progress Donut Chart) */}
-      <LifeClock
-        birthDateIso={data.birth_date}
-        expectedLifeYears={data.expected_life_years}
-        currentAgeYears={data.current_age.years}
-        remainingLifeYears={data.remaining_life.years}
-      />
+      {/* Full Desktop Single Viewport Grid Architecture */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+        
+        {/* Left Column (5 Cols on Desktop) */}
+        <div className="lg:col-span-5 flex flex-col gap-4">
+          {/* Life Clock (Circular Donut Chart) */}
+          <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4 backdrop-blur-md shadow-2xl flex-1 flex flex-col justify-center">
+            <LifeClock
+              birthDateIso={data.birth_date}
+              expectedLifeYears={data.expected_life_years}
+              currentAgeYears={data.current_age.years}
+              remainingLifeYears={data.remaining_life.years}
+            />
+          </div>
 
-      {/* 3. Special Question For You (30s rotation) */}
-      <section>
-        <DailyMemento question={data.question} />
-      </section>
+          {/* Temporal Milestones (Year / Month / Day Progress Bars) */}
+          <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4 backdrop-blur-md shadow-2xl">
+            <ProgressSection initialProgress={data.progress} />
+          </div>
+        </div>
 
-      {/* 4. TIME REMAINING (Countdown Hero with heartbeat & milliseconds) */}
-      <CountdownHero
-        key={`${birthDate}-${expectedLifeYears}-${data.remaining_seconds}`}
-        initialRemainingSeconds={data.remaining_seconds}
-        isGift={data.is_gift}
-        giftMessage={data.gift_message}
-      />
+        {/* Right Column (7 Cols on Desktop) */}
+        <div className="lg:col-span-7 flex flex-col gap-4">
+          {/* Time Remaining (Heartbeat Ticker with Milliseconds) */}
+          <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4 backdrop-blur-md shadow-2xl">
+            <CountdownHero
+              key={`${birthDate}-${expectedLifeYears}-${data.remaining_seconds}`}
+              initialRemainingSeconds={data.remaining_seconds}
+              isGift={data.is_gift}
+              giftMessage={data.gift_message}
+            />
+          </div>
 
-      {/* 5. Grid for Current Age & Years Remaining */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <CurrentAgeCard
-          key={data.birth_date}
-          birthDateIso={data.birth_date}
-          initialAge={data.current_age}
-        />
-        <RemainingLifeCard
-          remainingLife={data.remaining_life}
-          expectedLifeYears={data.expected_life_years}
-        />
-      </section>
+          {/* Special Question For You (30s Rotation) */}
+          <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 backdrop-blur-md shadow-2xl">
+            <DailyMemento question={data.question} />
+          </div>
 
-      {/* 6. Temporal Progress Milestones (Year / Month / Day) */}
-      <section>
-        <ProgressSection initialProgress={data.progress} />
-      </section>
+          {/* Daily Wisdom Quote */}
+          <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4 backdrop-blur-md shadow-2xl flex-1 flex flex-col justify-center">
+            <DailyQuote quote={data.quote} />
+          </div>
+        </div>
 
-      {/* 7. Daily Wisdom Quote */}
-      <section>
-        <DailyQuote quote={data.quote} />
-      </section>
+      </div>
     </div>
   );
 }

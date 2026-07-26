@@ -31,11 +31,11 @@ export default function CountdownHero({
 
       const currentSecondInt = Math.floor(currentRemaining);
 
-      // Trigger one fast heartbeat pulse every time a new second tick occurs!
+      // Trigger fast heartbeat pulse every time a new second tick occurs
       if (currentSecondInt !== prevSecondRef.current) {
         prevSecondRef.current = currentSecondInt;
         controls.start({
-          scale: [1, 1.05, 0.98, 1.02, 1],
+          scale: [1, 1.04, 0.98, 1.015, 1],
           transition: { duration: 0.35, ease: "easeInOut" },
         });
       }
@@ -56,55 +56,50 @@ export default function CountdownHero({
   const msFormatted = String(msFraction).padStart(3, "0");
 
   return (
-    <section className="relative my-8 flex flex-col items-center justify-center text-center px-4">
+    <section className="relative flex flex-col items-center justify-center text-center p-2">
       {/* Label Badge: Time Remaining */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-4 inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950/80 px-4 py-1 text-[11px] uppercase tracking-widest text-neutral-400 font-mono"
+        transition={{ duration: 0.4 }}
+        className="mb-2 inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950/90 px-3 py-0.5 text-[10px] uppercase tracking-widest text-neutral-400 font-mono"
       >
-        <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
+        <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-ping" />
         Time Remaining
       </motion.div>
 
-      {/* Heartbeat Ticker Display with Milliseconds */}
-      <div className="relative py-4">
+      {/* Heartbeat Ticker Display with Proportional Non-Overflow Sizing */}
+      <div className="relative py-1 w-full overflow-hidden">
         {isGiftNow ? (
           <motion.h1
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-3xl sm:text-5xl font-extralight tracking-tight text-white leading-snug"
+            className="text-2xl sm:text-3xl font-extralight tracking-tight text-white leading-snug"
           >
             {giftMessage}
           </motion.h1>
         ) : (
           <div className="flex flex-col items-center">
-            {/* Heartbeat animated main container */}
+            {/* Perfectly scaled non-overflowing text */}
             <motion.div
               animate={controls}
-              className="flex items-baseline justify-center font-ticker memento-glow text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-white leading-none select-none my-2"
+              className="flex items-baseline justify-center font-ticker memento-glow text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-none select-none my-1 whitespace-nowrap"
             >
               <span>{formatNumberWithCommas(integerSeconds)}</span>
-              <span className="text-rose-500 font-mono text-2xl sm:text-4xl md:text-5xl ml-1 font-semibold">
+              <span className="text-rose-500 font-mono text-base sm:text-xl lg:text-2xl ml-1 font-semibold">
                 .{msFormatted}
               </span>
             </motion.div>
 
-            <div className="flex items-center gap-2 mt-3">
-              <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
-              <span className="text-xs font-mono tracking-widest uppercase text-neutral-400">
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <span className="h-1 w-1 rounded-full bg-rose-500 animate-pulse" />
+              <span className="text-[10px] font-mono tracking-widest uppercase text-neutral-400">
                 Seconds & Milliseconds Remaining
               </span>
             </div>
           </div>
         )}
       </div>
-
-      {/* Minimalist quote */}
-      <p className="max-w-md text-xs text-neutral-400 font-light tracking-wide mt-2">
-        Time is non-renewable. Treat every single tick as a precious unit of existence.
-      </p>
     </section>
   );
 }
