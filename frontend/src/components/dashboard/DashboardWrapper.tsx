@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import TimelineConfigBar from "./TimelineConfigBar";
+import LifeClock from "./LifeClock";
 import CountdownHero from "./CountdownHero";
 import CurrentAgeCard from "./CurrentAgeCard";
 import RemainingLifeCard from "./RemainingLifeCard";
@@ -95,15 +96,28 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
   };
 
   return (
-    <div className="space-y-10">
-      {/* Timeline Input Bar */}
+    <div className="space-y-12">
+      {/* 1. Timeline Input Bar */}
       <TimelineConfigBar
         currentBirthDate={birthDate}
         currentExpectedLife={expectedLifeYears}
         onUpdate={handleTimelineUpdate}
       />
 
-      {/* 1. Life Countdown (Hero) */}
+      {/* 2. LIFE CLOCK (Circular Life Progress Donut Chart) */}
+      <LifeClock
+        birthDateIso={data.birth_date}
+        expectedLifeYears={data.expected_life_years}
+        currentAgeYears={data.current_age.years}
+        remainingLifeYears={data.remaining_life.years}
+      />
+
+      {/* 3. Special Question For You (30s rotation) */}
+      <section>
+        <DailyMemento question={data.question} />
+      </section>
+
+      {/* 4. TIME REMAINING (Countdown Hero with heartbeat & milliseconds) */}
       <CountdownHero
         key={`${birthDate}-${expectedLifeYears}-${data.remaining_seconds}`}
         initialRemainingSeconds={data.remaining_seconds}
@@ -111,12 +125,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
         giftMessage={data.gift_message}
       />
 
-      {/* 2. Special Question For You (Placed DIRECTLY UNDER countdown) */}
-      <section>
-        <DailyMemento question={data.question} />
-      </section>
-
-      {/* 3. Grid for Current Age & Expected Remaining Life */}
+      {/* 5. Grid for Current Age & Years Remaining */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CurrentAgeCard
           key={data.birth_date}
@@ -129,12 +138,12 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
         />
       </section>
 
-      {/* 4. Temporal Milestones */}
+      {/* 6. Temporal Progress Milestones (Year / Month / Day) */}
       <section>
         <ProgressSection initialProgress={data.progress} />
       </section>
 
-      {/* 5. Daily Wisdom Quote */}
+      {/* 7. Daily Wisdom Quote */}
       <section>
         <DailyQuote quote={data.quote} />
       </section>

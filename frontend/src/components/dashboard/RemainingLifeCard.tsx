@@ -22,7 +22,7 @@ export default function RemainingLifeCard({
       <div className="flex items-center justify-between border-b border-neutral-800/80 pb-4 mb-6">
         <div>
           <h2 className="text-xs uppercase tracking-widest text-neutral-400 font-semibold">
-            Expected Remaining Life
+            Years Remaining
           </h2>
           <p className="text-xs text-neutral-400 font-light mt-0.5">
             Based on target mortality horizon of {expectedLifeYears} years
@@ -39,7 +39,7 @@ export default function RemainingLifeCard({
             {remainingLife.years}
           </span>
           <span className="text-[10px] uppercase tracking-wider text-neutral-400 mt-1">
-            Years Left
+            Years Remaining
           </span>
         </div>
 
@@ -48,7 +48,7 @@ export default function RemainingLifeCard({
             {remainingLife.months}
           </span>
           <span className="text-[10px] uppercase tracking-wider text-neutral-400 mt-1">
-            Months Left
+            Months Remaining
           </span>
         </div>
 
@@ -57,7 +57,7 @@ export default function RemainingLifeCard({
             {remainingLife.days}
           </span>
           <span className="text-[10px] uppercase tracking-wider text-neutral-400 mt-1">
-            Days Left
+            Days Remaining
           </span>
         </div>
       </div>

@@ -51,14 +51,13 @@ export default function CountdownHero({
 
   const isGiftNow = secondsWithMs <= 0 || initialIsGift;
 
-  // Split integer seconds and milliseconds
   const integerSeconds = Math.floor(secondsWithMs);
   const msFraction = Math.floor((secondsWithMs % 1) * 1000);
   const msFormatted = String(msFraction).padStart(3, "0");
 
   return (
     <section className="relative my-8 flex flex-col items-center justify-center text-center px-4">
-      {/* Label Badge */}
+      {/* Label Badge: Time Remaining */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -66,7 +65,7 @@ export default function CountdownHero({
         className="mb-4 inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950/80 px-4 py-1 text-[11px] uppercase tracking-widest text-neutral-400 font-mono"
       >
         <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
-        Estimated Life Remaining
+        Time Remaining
       </motion.div>
 
       {/* Heartbeat Ticker Display with Milliseconds */}
