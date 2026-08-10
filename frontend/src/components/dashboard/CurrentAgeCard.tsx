@@ -3,70 +3,32 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { CurrentAge } from "@/types";
+import { calculateCurrentAge } from "@/lib/calculations";
+import { formatNumberWithCommas } from "@/lib/utils";
+import { Hourglass, Sparkles, Activity } from "lucide-react";
 
 interface CurrentAgeCardProps {
   birthDateIso: string;
-  initialAge: CurrentAge;
+  initialAge?: CurrentAge;
 }
 
 export default function CurrentAgeCard({ birthDateIso, initialAge }: CurrentAgeCardProps) {
-  const [age, setAge] = useState<CurrentAge>(initialAge);
+  const [age, setAge] = useState<CurrentAge>(
+    initialAge || calculateCurrentAge(birthDateIso)
+  );
 
   useEffect(() => {
-    const birthDate = new Date(birthDateIso);
-
     const updateAge = () => {
-      const now = new Date();
-      const diffMs = now.getTime() - birthDate.getTime();
-      const totalSeconds = Math.max(0, diffMs / 1000);
-      const totalYears = totalSeconds / (365.2425 * 86400);
-
-      // Precise breakdown
-      let years = now.getUTCFullYear() - birthDate.getUTCFullYear();
-      let months = now.getUTCMonth() - birthDate.getUTCMonth();
-      let days = now.getUTCDate() - birthDate.getUTCDate();
-      let hours = now.getUTCHours();
-      let minutes = now.getUTCMinutes();
-      let seconds = now.getUTCSeconds();
-
-      if (seconds < 0) {
-        minutes -= 1;
-        seconds += 60;
-      }
-      if (minutes < 0) {
-        hours -= 1;
-        minutes += 60;
-      }
-      if (hours < 0) {
-        days -= 1;
-        hours += 24;
-      }
-      if (days < 0) {
-        months -= 1;
-        const prevMonthDays = new Date(now.getUTCFullYear(), now.getUTCMonth(), 0).getDate();
-        days += prevMonthDays;
-      }
-      if (months < 0) {
-        years -= 1;
-        months += 12;
-      }
-
-      setAge({
-        years: Math.max(0, years),
-        months: Math.max(0, months),
-        days: Math.max(0, days),
-        hours: Math.max(0, hours),
-        minutes: Math.max(0, minutes),
-        seconds: Math.max(0, seconds),
-        total_seconds: totalSeconds,
-        total_years: totalYears,
-      });
+      setAge(calculateCurrentAge(birthDateIso));
     };
 
     updateAge();
     const interval = setInterval(updateAge, 1000);
     return () => clearInterval(interval);
   }, [birthDateIso]);
+
+  const totalDaysLived = Math.floor(age.total_seconds / 86400);
+  const totalHoursLived = Math.floor(age.total_seconds / 3600);
 
   const timeUnits = [
     { label: "Years", value: age.years },
@@ -81,35 +43,62 @@ export default function CurrentAgeCard({ birthDateIso, initialAge }: CurrentAgeC
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
-      className="flex flex-col rounded-2xl border border-neutral-800/80 bg-surface/50 p-6 sm:p-8 backdrop-blur-xs"
+      transition={{ duration: 0.4 }}
+      className="flex flex-col rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4 sm:p-5 backdrop-blur-md shadow-2xl"
     >
-      <div className="flex items-center justify-between border-b border-neutral-800/80 pb-4 mb-6">
-        <div>
-          <h2 className="text-xs uppercase tracking-widest text-neutral-400 font-semibold">
-            Current Age
-          </h2>
-          <p className="text-xs text-neutral-400 font-light mt-0.5">
-            Exact time elapsed since birth ({age.total_years.toFixed(2)} years)
-          </p>
+      <div className="flex items-center justify-between border-b border-neutral-900 pb-3 mb-4">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900 text-amber-400">
+            <Hourglass className="h-3.5 w-3.5" />
+          </div>
+          <div>
+            <h2 className="text-xs uppercase tracking-widest text-neutral-300 font-semibold">
+              Time You Have Lived
+            </h2>
+            <p className="text-[11px] text-neutral-500 font-mono">
+              Exact elapsed time since birth ({age.total_years.toFixed(2)} yrs)
+            </p>
+          </div>
         </div>
-        <div className="h-2 w-2 rounded-full bg-emerald-500/80 animate-ping" />
+
+        <div className="flex items-center gap-1.5 rounded-full bg-neutral-900 border border-neutral-800 px-2.5 py-1 text-[10px] font-mono text-emerald-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Live Ticking</span>
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 text-center">
+      {/* Live Breakdown Grid */}
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
         {timeUnits.map((unit) => (
           <div
             key={unit.label}
-            className="flex flex-col items-center justify-center rounded-xl border border-neutral-900 bg-neutral-950/80 py-4 px-2"
+            className="flex flex-col items-center justify-center rounded-xl border border-neutral-900 bg-neutral-900/40 py-2.5 px-1.5"
           >
-            <span className="font-ticker text-2xl sm:text-3xl font-light text-white">
+            <span className="font-ticker text-xl sm:text-2xl font-bold text-white">
               {String(unit.value).padStart(2, "0")}
             </span>
-            <span className="text-[10px] uppercase tracking-wider text-neutral-400 mt-1">
+            <span className="text-[9px] uppercase tracking-wider text-neutral-400 mt-0.5 font-mono">
               {unit.label}
             </span>
           </div>
         ))}
+      </div>
+
+      {/* Total Days & Hours Summary */}
+      <div className="mt-3 grid grid-cols-2 gap-2 text-center border-t border-neutral-900/80 pt-3">
+        <div className="rounded-xl border border-neutral-900/60 bg-neutral-900/20 py-1.5 px-2">
+          <div className="text-[10px] uppercase font-mono text-neutral-500">Total Days Lived</div>
+          <div className="font-ticker text-sm sm:text-base font-semibold text-neutral-200 mt-0.5">
+            {totalDaysLived.toLocaleString()} days
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-neutral-900/60 bg-neutral-900/20 py-1.5 px-2">
+          <div className="text-[10px] uppercase font-mono text-neutral-500">Total Hours Lived</div>
+          <div className="font-ticker text-sm sm:text-base font-semibold text-neutral-200 mt-0.5">
+            {totalHoursLived.toLocaleString()} hrs
+          </div>
+        </div>
       </div>
     </motion.div>
   );

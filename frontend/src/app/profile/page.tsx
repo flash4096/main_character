@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/dashboard/Navbar";
 import Footer from "@/components/dashboard/Footer";
 import { getCurrentUser, updateProfile } from "@/lib/api";
+import { setCachedBirthDate, setCachedLifeExpectancy } from "@/lib/calculations";
 import { User } from "@/types";
 import { Calendar, HeartPulse, Save, User as UserIcon } from "lucide-react";
 
@@ -49,6 +50,8 @@ export default function ProfilePage() {
         birth_date: birthDate,
         expected_life_years: Number(expectedLifeYears),
       });
+      setCachedBirthDate(birthDate);
+      setCachedLifeExpectancy(Number(expectedLifeYears));
       setUser(updated);
       setMessage("Timeline configuration updated successfully!");
     } catch (err: any) {
