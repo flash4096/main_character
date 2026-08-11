@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/dashboard/Navbar";
 import Footer from "@/components/dashboard/Footer";
 import { getCurrentUser, updateProfile } from "@/lib/api";
-import { setCachedBirthDate, setCachedLifeExpectancy } from "@/lib/calculations";
+import { 
+  setCachedBirthDate, 
+  setCachedLifeExpectancy, 
+  getCachedCustomLifeExpectancyEnabled, 
+  setCachedCustomLifeExpectancyEnabled,
+  DEFAULT_LIFE_EXPECTANCY 
+} from "@/lib/calculations";
 import { User } from "@/types";
 import { Calendar, HeartPulse, Save, User as UserIcon } from "lucide-react";
 
@@ -14,7 +20,8 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [fullName, setFullName] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [expectedLifeYears, setExpectedLifeYears] = useState<number>(73);
+  const [expectedLifeYears, setExpectedLifeYears] = useState<number>(DEFAULT_LIFE_EXPECTANCY);
+  const [isCustomExpectancyEnabled, setIsCustomExpectancyEnabled] = useState<boolean>(false);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -28,7 +35,8 @@ export default function ProfilePage() {
         setUser(u);
         setFullName(u.full_name || "");
         setBirthDate(u.birth_date || "1998-01-01");
-        setExpectedLifeYears(u.expected_life_years || 73);
+        setExpectedLifeYears(u.expected_life_years || DEFAULT_LIFE_EXPECTANCY);
+        setIsCustomExpectancyEnabled(getCachedCustomLifeExpectancyEnabled());
       } catch (err) {
         router.push("/login");
       } finally {
@@ -45,13 +53,15 @@ export default function ProfilePage() {
     setSaving(true);
 
     try {
+      const targetExpectancy = isCustomExpectancyEnabled ? Number(expectedLifeYears) : DEFAULT_LIFE_EXPECTANCY;
       const updated = await updateProfile({
         full_name: fullName || undefined,
         birth_date: birthDate,
-        expected_life_years: Number(expectedLifeYears),
+        expected_life_years: targetExpectancy,
       });
       setCachedBirthDate(birthDate);
-      setCachedLifeExpectancy(Number(expectedLifeYears));
+      setCachedLifeExpectancy(targetExpectancy);
+      setCachedCustomLifeExpectancyEnabled(isCustomExpectancyEnabled);
       setUser(updated);
       setMessage("Timeline configuration updated successfully!");
     } catch (err: any) {
@@ -144,25 +154,55 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs uppercase tracking-wider text-neutral-400 font-mono">
-                Expected Life Expectancy (Years)
-              </label>
-              <div className="relative flex items-center">
-                <HeartPulse className="absolute left-3.5 h-4 w-4 text-neutral-500" />
-                <input
-                  type="number"
-                  required
-                  min={1}
-                  max={150}
-                  value={expectedLifeYears}
-                  onChange={(e) => setExpectedLifeYears(Number(e.target.value))}
-                  className="w-full rounded-xl border border-neutral-800 bg-black py-2.5 pl-10 pr-4 text-sm text-white focus:border-white focus:outline-none transition"
-                />
+            <div className="space-y-3 rounded-xl border border-neutral-800/80 bg-neutral-950 p-3.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <HeartPulse className="h-4 w-4 text-rose-400" />
+                  <label className="text-xs uppercase tracking-wider text-neutral-300 font-mono cursor-pointer" onClick={() => setIsCustomExpectancyEnabled(!isCustomExpectancyEnabled)}>
+                    Customize Life Expectancy
+                  </label>
+                </div>
+
+                {/* Toggle switch */}
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isCustomExpectancyEnabled}
+                  onClick={() => setIsCustomExpectancyEnabled(!isCustomExpectancyEnabled)}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    isCustomExpectancyEnabled ? "bg-rose-500" : "bg-neutral-800"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      isCustomExpectancyEnabled ? "translate-x-4" : "translate-x-0"
+                    }`}
+                  />
+                </button>
               </div>
-              <p className="text-[10px] text-neutral-400 font-light mt-1">
-                Global average default is 73 years. Adjust to your country or personal estimate.
-              </p>
+
+              {!isCustomExpectancyEnabled ? (
+                <div className="text-[11px] text-neutral-400 font-light">
+                  Standard global benchmark ({DEFAULT_LIFE_EXPECTANCY} years) is active. Toggle switch to set a custom target.
+                </div>
+              ) : (
+                <div className="space-y-1.5 pt-1">
+                  <div className="relative flex items-center">
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      max={150}
+                      value={expectedLifeYears}
+                      onChange={(e) => setExpectedLifeYears(Number(e.target.value))}
+                      className="w-full rounded-xl border border-neutral-800 bg-black py-2.5 px-4 text-sm text-white focus:border-white focus:outline-none transition font-ticker"
+                    />
+                  </div>
+                  <p className="text-[10px] text-neutral-400 font-light">
+                    Global average default is 73 years. Adjust to your country or personal estimate.
+                  </p>
+                </div>
+              )}
             </div>
 
             <button

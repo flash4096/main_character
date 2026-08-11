@@ -18,6 +18,8 @@ import {
   formatDateDisplay, 
   calculateCurrentAge, 
   normalizeDateIso,
+  getCachedCustomLifeExpectancyEnabled,
+  setCachedCustomLifeExpectancyEnabled,
   DEFAULT_BIRTH_DATE, 
   DEFAULT_LIFE_EXPECTANCY 
 } from "@/lib/calculations";
@@ -35,12 +37,14 @@ export default function TimelineConfigBar({
 }: TimelineConfigBarProps) {
   const [birthDate, setBirthDate] = useState<string>(normalizeDateIso(currentBirthDate || DEFAULT_BIRTH_DATE));
   const [expectedLife, setExpectedLife] = useState<number>(currentExpectedLife || DEFAULT_LIFE_EXPECTANCY);
+  const [isCustomExpectancyEnabled, setIsCustomExpectancyEnabled] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [justSaved, setJustSaved] = useState<boolean>(false);
 
   useEffect(() => {
     if (currentBirthDate) setBirthDate(normalizeDateIso(currentBirthDate));
     if (currentExpectedLife) setExpectedLife(currentExpectedLife);
+    setIsCustomExpectancyEnabled(getCachedCustomLifeExpectancyEnabled());
   }, [currentBirthDate, currentExpectedLife]);
 
   const currentAgeObj = calculateCurrentAge(birthDate);
@@ -58,6 +62,19 @@ export default function TimelineConfigBar({
     const clamped = Math.max(1, Math.min(130, newExp));
     setExpectedLife(clamped);
     onUpdate(birthDate, clamped);
+    triggerSaveFeedback();
+  };
+
+  const handleToggleCustomExpectancy = () => {
+    const nextState = !isCustomExpectancyEnabled;
+    setIsCustomExpectancyEnabled(nextState);
+    setCachedCustomLifeExpectancyEnabled(nextState);
+    if (!nextState) {
+      setExpectedLife(DEFAULT_LIFE_EXPECTANCY);
+      onUpdate(birthDate, DEFAULT_LIFE_EXPECTANCY);
+    } else {
+      onUpdate(birthDate, expectedLife);
+    }
     triggerSaveFeedback();
   };
 
@@ -80,6 +97,8 @@ export default function TimelineConfigBar({
   const handleReset = () => {
     setBirthDate(DEFAULT_BIRTH_DATE);
     setExpectedLife(DEFAULT_LIFE_EXPECTANCY);
+    setIsCustomExpectancyEnabled(false);
+    setCachedCustomLifeExpectancyEnabled(false);
     onUpdate(DEFAULT_BIRTH_DATE, DEFAULT_LIFE_EXPECTANCY);
     triggerSaveFeedback();
   };
@@ -116,6 +135,9 @@ export default function TimelineConfigBar({
                 <span className="flex items-center gap-1">
                   <HeartPulse className="h-3 w-3 text-rose-500/80" />
                   Target: <strong className="text-neutral-200">{expectedLife} yrs</strong>
+                  {!isCustomExpectancyEnabled && (
+                    <span className="text-[10px] text-neutral-500 ml-0.5">(Default)</span>
+                  )}
                 </span>
                 <span className="text-neutral-600">•</span>
                 <span className="flex items-center gap-1 text-emerald-400/90">
@@ -138,7 +160,7 @@ export default function TimelineConfigBar({
               }`}
             >
               <Sliders className="h-3.5 w-3.5" />
-              <span>{isExpanded ? "Close Settings" : "Change Birth Date"}</span>
+              <span>{isExpanded ? "Close Settings" : "Settings"}</span>
               {isExpanded ? (
                 <ChevronUp className="h-3.5 w-3.5" />
               ) : (
@@ -164,7 +186,7 @@ export default function TimelineConfigBar({
                 {/* 1. Direct Birth Date Input (5 cols) */}
                 <div className="lg:col-span-5 space-y-1.5">
                   <label className="block text-xs font-medium uppercase tracking-wider text-neutral-300">
-                    Enter Your Exact Birth Date:
+                    Date of Birth:
                   </label>
                   <div className="relative flex items-center">
                     <input
@@ -197,54 +219,93 @@ export default function TimelineConfigBar({
                   </div>
                 </div>
 
-                {/* 2. Target Life Expectancy (4 cols) */}
-                <div className="lg:col-span-4 space-y-1.5">
+                {/* 2. Target Life Expectancy (4 cols) - Disabled by default with toggle */}
+                <div className="lg:col-span-4 space-y-2 rounded-xl border border-neutral-800/80 bg-neutral-900/40 p-3">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-medium uppercase tracking-wider text-neutral-300">
-                      Life Expectancy Target:
-                    </label>
-                    <span className="text-xs font-bold font-ticker text-rose-400">
-                      {expectedLife} years
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min={40}
-                      max={120}
-                      value={expectedLife}
-                      onChange={(e) => handleExpectancyChange(Number(e.target.value))}
-                      className="w-full accent-rose-500 cursor-pointer h-2 bg-neutral-900 rounded-lg"
-                    />
-                    <input
-                      type="number"
-                      min={1}
-                      max={130}
-                      value={expectedLife}
-                      onChange={(e) => handleExpectancyChange(Number(e.target.value))}
-                      className="w-16 rounded-xl border border-neutral-700 bg-neutral-900/90 px-2 py-2 text-center text-xs font-bold font-ticker text-white focus:border-rose-400 focus:outline-none"
-                    />
-                  </div>
-
-                  {/* Expectancy Quick Buttons */}
-                  <div className="flex items-center gap-1.5 pt-1">
-                    <span className="text-[10px] text-neutral-500 font-mono uppercase">Target:</span>
-                    {quickExpectancyPresets.map((exp) => (
-                      <button
-                        key={exp}
-                        type="button"
-                        onClick={() => handleExpectancyChange(exp)}
-                        className={`rounded-lg px-2 py-0.5 text-[11px] font-mono transition border ${
-                          expectedLife === exp
-                            ? "bg-rose-500/20 border-rose-500/50 text-rose-300"
-                            : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700"
+                    <div className="flex items-center gap-1.5">
+                      <HeartPulse className="h-3.5 w-3.5 text-rose-400" />
+                      <label className="text-xs font-medium uppercase tracking-wider text-neutral-300 cursor-pointer" onClick={handleToggleCustomExpectancy}>
+                        Life Expectancy Target
+                      </label>
+                    </div>
+                    
+                    {/* Toggle Switch */}
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={isCustomExpectancyEnabled}
+                      onClick={handleToggleCustomExpectancy}
+                      title={isCustomExpectancyEnabled ? "Disable custom target (use default 73y)" : "Enable custom target"}
+                      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        isCustomExpectancyEnabled ? "bg-rose-500" : "bg-neutral-800"
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                          isCustomExpectancyEnabled ? "translate-x-4" : "translate-x-0"
                         }`}
-                      >
-                        {exp}y
-                      </button>
-                    ))}
+                      />
+                    </button>
                   </div>
+
+                  {!isCustomExpectancyEnabled ? (
+                    <div className="flex flex-col gap-1 pt-1">
+                      <div className="flex items-center justify-between text-[11px] text-neutral-400">
+                        <span>Standard Benchmark: <strong className="text-neutral-200">{DEFAULT_LIFE_EXPECTANCY} yrs</strong></span>
+                        <span className="text-[10px] text-neutral-500 font-mono">Turn off</span>
+                      </div>
+                      <p className="text-[10px] text-neutral-500 leading-tight">
+                        Target disabled. Using standard global benchmark ({DEFAULT_LIFE_EXPECTANCY}y). Toggle switch to customize.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 pt-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-neutral-400 font-mono">Custom Target:</span>
+                        <span className="text-xs font-bold font-ticker text-rose-400">
+                          {expectedLife} years
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2.5">
+                        <input
+                          type="range"
+                          min={40}
+                          max={120}
+                          value={expectedLife}
+                          onChange={(e) => handleExpectancyChange(Number(e.target.value))}
+                          className="w-full accent-rose-500 cursor-pointer h-2 bg-neutral-950 rounded-lg"
+                        />
+                        <input
+                          type="number"
+                          min={1}
+                          max={130}
+                          value={expectedLife}
+                          onChange={(e) => handleExpectancyChange(Number(e.target.value))}
+                          className="w-14 rounded-lg border border-neutral-700 bg-neutral-950 px-1.5 py-1 text-center text-xs font-bold font-ticker text-white focus:border-rose-400 focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Expectancy Quick Buttons */}
+                      <div className="flex items-center gap-1.5 pt-0.5">
+                        <span className="text-[10px] text-neutral-500 font-mono uppercase">Quick:</span>
+                        {quickExpectancyPresets.map((exp) => (
+                          <button
+                            key={exp}
+                            type="button"
+                            onClick={() => handleExpectancyChange(exp)}
+                            className={`rounded-lg px-2 py-0.5 text-[11px] font-mono transition border ${
+                              expectedLife === exp
+                                ? "bg-rose-500/20 border-rose-500/50 text-rose-300"
+                                : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700"
+                            }`}
+                          >
+                            {exp}y
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 3. Actions / Reset / Done (3 cols) */}

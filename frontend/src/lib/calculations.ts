@@ -105,6 +105,18 @@ export function setCachedLifeExpectancy(expectedLife: number): void {
   localStorage.setItem(LEGACY_CACHE_KEY_LIFE_EXPECTANCY, String(expectedLife));
 }
 
+export const CACHE_KEY_CUSTOM_LIFE_EXPECTANCY_ENABLED = "main_character_enable_custom_life_expectancy";
+
+export function getCachedCustomLifeExpectancyEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(CACHE_KEY_CUSTOM_LIFE_EXPECTANCY_ENABLED) === "true";
+}
+
+export function setCachedCustomLifeExpectancyEnabled(enabled: boolean): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(CACHE_KEY_CUSTOM_LIFE_EXPECTANCY_ENABLED, enabled ? "true" : "false");
+}
+
 export function formatDateDisplay(dateStr: string): string {
   if (!dateStr) return "";
   try {
