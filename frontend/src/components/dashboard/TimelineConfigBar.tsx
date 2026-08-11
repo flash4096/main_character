@@ -17,6 +17,7 @@ import {
 import { 
   formatDateDisplay, 
   calculateCurrentAge, 
+  normalizeDateIso,
   DEFAULT_BIRTH_DATE, 
   DEFAULT_LIFE_EXPECTANCY 
 } from "@/lib/calculations";
@@ -32,13 +33,13 @@ export default function TimelineConfigBar({
   currentExpectedLife,
   onUpdate,
 }: TimelineConfigBarProps) {
-  const [birthDate, setBirthDate] = useState<string>(currentBirthDate || DEFAULT_BIRTH_DATE);
+  const [birthDate, setBirthDate] = useState<string>(normalizeDateIso(currentBirthDate || DEFAULT_BIRTH_DATE));
   const [expectedLife, setExpectedLife] = useState<number>(currentExpectedLife || DEFAULT_LIFE_EXPECTANCY);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [justSaved, setJustSaved] = useState<boolean>(false);
 
   useEffect(() => {
-    if (currentBirthDate) setBirthDate(currentBirthDate);
+    if (currentBirthDate) setBirthDate(normalizeDateIso(currentBirthDate));
     if (currentExpectedLife) setExpectedLife(currentExpectedLife);
   }, [currentBirthDate, currentExpectedLife]);
 
@@ -47,8 +48,9 @@ export default function TimelineConfigBar({
 
   const handleDateChange = (newDate: string) => {
     if (!newDate) return;
-    setBirthDate(newDate);
-    onUpdate(newDate, expectedLife);
+    const normalized = normalizeDateIso(newDate);
+    setBirthDate(normalized);
+    onUpdate(normalized, expectedLife);
     triggerSaveFeedback();
   };
 
@@ -69,6 +71,7 @@ export default function TimelineConfigBar({
     { label: "1995", date: "1995-06-15" },
     { label: "1998", date: "1998-01-01" },
     { label: "2000", date: "2000-01-01" },
+    { label: "2002", date: "2002-08-11" },
     { label: "2005", date: "2005-01-01" },
   ];
 

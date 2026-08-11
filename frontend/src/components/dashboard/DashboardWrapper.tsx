@@ -19,6 +19,7 @@ import {
   getCachedLifeExpectancy, 
   setCachedLifeExpectancy,
   computeFullDashboard,
+  normalizeDateIso,
   DEFAULT_BIRTH_DATE,
   DEFAULT_LIFE_EXPECTANCY
 } from "@/lib/calculations";
@@ -30,7 +31,7 @@ interface DashboardWrapperProps {
 
 export default function DashboardWrapper({ initialData }: DashboardWrapperProps) {
   const [data, setData] = useState<DashboardData>(initialData);
-  const [birthDate, setBirthDate] = useState<string>(initialData.birth_date || DEFAULT_BIRTH_DATE);
+  const [birthDate, setBirthDate] = useState<string>(normalizeDateIso(initialData.birth_date || DEFAULT_BIRTH_DATE));
   const [expectedLifeYears, setExpectedLifeYears] = useState<number>(
     initialData.expected_life_years || DEFAULT_LIFE_EXPECTANCY
   );
@@ -42,7 +43,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
     const cachedBirth = getCachedBirthDate();
     const cachedExpectancy = getCachedLifeExpectancy();
 
-    const activeBirth = cachedBirth || initialData.birth_date || DEFAULT_BIRTH_DATE;
+    const activeBirth = normalizeDateIso(cachedBirth || initialData.birth_date || DEFAULT_BIRTH_DATE);
     const activeExpectancy = cachedExpectancy || initialData.expected_life_years || DEFAULT_LIFE_EXPECTANCY;
 
     setBirthDate(activeBirth);

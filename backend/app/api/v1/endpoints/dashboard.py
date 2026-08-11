@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, date, timezone
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
@@ -31,6 +32,35 @@ DEFAULT_QUOTE = {
 }
 
 
+def parse_flexible_date(date_str: Optional[str]) -> Optional[date]:
+    if not date_str:
+        return None
+    s = date_str.strip()
+    ymd = re.match(r"^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})", s)
+    if ymd:
+        try:
+            return date(int(ymd.group(1)), int(ymd.group(2)), int(ymd.group(3)))
+        except ValueError:
+            pass
+    mdy = re.match(r"^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})", s)
+    if mdy:
+        first, second, year = int(mdy.group(1)), int(mdy.group(2)), int(mdy.group(3))
+        if first > 12:
+            try:
+                return date(year, second, first)
+            except ValueError:
+                pass
+        else:
+            try:
+                return date(year, first, second)
+            except ValueError:
+                pass
+    try:
+        return date.fromisoformat(s)
+    except ValueError:
+        return None
+
+
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
     birth_date_param: Optional[str] = Query(None, alias="birth_date"),
@@ -41,11 +71,9 @@ async def get_dashboard(
     now = datetime.now(timezone.utc)
 
     # Determine birth date and expected life years
-    if birth_date_param:
-        try:
-            birth_date = date.fromisoformat(birth_date_param)
-        except ValueError:
-            birth_date = current_user.birth_date if current_user else date(1998, 1, 1)
+    parsed_date = parse_flexible_date(birth_date_param) if birth_date_param else None
+    if parsed_date:
+        birth_date = parsed_date
     elif current_user:
         birth_date = current_user.birth_date
     else:
