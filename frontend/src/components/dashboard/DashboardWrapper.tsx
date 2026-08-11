@@ -101,7 +101,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
     <>
       <Navbar onOpenManifest={() => setIsManifestOpen(true)} />
 
-      <main className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="space-y-3.5 sm:space-y-4 max-w-[1536px] 2xl:max-w-[1640px] mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
         {/* Prominent Direct Date & Expectancy Configuration Bar */}
         <TimelineConfigBar
           currentBirthDate={birthDate}
@@ -109,13 +109,13 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
           onUpdate={handleTimelineUpdate}
         />
 
-        {/* Hero Statistics Section (Dual Column Layout) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        {/* High-Density Command Center (3-Column Grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3.5 sm:gap-4 items-stretch">
           
-          {/* Left Column: Life Progress & Time Lived (5 Cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-5">
+          {/* Column 1: Life Progress & Time Lived (4 Cols) */}
+          <div className="md:col-span-1 lg:col-span-4 flex flex-col gap-3.5">
             {/* Life Clock (Circular Donut Chart) */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4 backdrop-blur-md shadow-2xl flex flex-col justify-center">
+            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 backdrop-blur-md shadow-2xl flex flex-col justify-center">
               <LifeClock
                 key={`clock-${birthDate}-${expectedLifeYears}`}
                 birthDateIso={data.birth_date}
@@ -125,23 +125,18 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
               />
             </div>
 
-            {/* Time You Have Lived (Exact Breakdown) */}
+            {/* Time You Have Lived (Exact Elapsed Breakdown) */}
             <CurrentAgeCard
               key={`age-${birthDate}`}
               birthDateIso={data.birth_date}
               initialAge={data.current_age}
             />
-
-            {/* Temporal Milestones (Year / Month / Day Progress Bars) */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4 sm:p-5 backdrop-blur-md shadow-2xl">
-              <ProgressSection initialProgress={data.progress} />
-            </div>
           </div>
 
-          {/* Right Column: Time Remaining & Philosophical Wisdom (7 Cols) */}
-          <div className="lg:col-span-7 flex flex-col gap-5">
+          {/* Column 2: Time Remaining Horizon & Countdown (4 Cols) */}
+          <div className="md:col-span-1 lg:col-span-4 flex flex-col gap-3.5">
             {/* Countdown Hero (Heartbeat Ticker with Milliseconds) */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4 backdrop-blur-md shadow-2xl">
+            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 backdrop-blur-md shadow-2xl">
               <CountdownHero
                 key={`hero-${birthDate}-${expectedLifeYears}-${data.remaining_seconds}`}
                 initialRemainingSeconds={data.remaining_seconds}
@@ -156,6 +151,17 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
               remainingLife={data.remaining_life}
               expectedLifeYears={data.expected_life_years}
             />
+          </div>
+
+          {/* Column 3: Temporal & Age Progress + Philosophical Wisdom (4 Cols) */}
+          <div className="md:col-span-2 lg:col-span-4 flex flex-col gap-3.5">
+            {/* Temporal Milestones (Age Progress & Year / Month / Day Progress Bars) */}
+            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl">
+              <ProgressSection
+                initialProgress={data.progress}
+                birthDateIso={data.birth_date}
+              />
+            </div>
 
             {/* Special Existential Question */}
             <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 backdrop-blur-md shadow-2xl">
@@ -163,15 +169,15 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
             </div>
 
             {/* Daily Wisdom Quote */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4 backdrop-blur-md shadow-2xl flex-1 flex flex-col justify-center">
+            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl flex-1 flex flex-col justify-center">
               <DailyQuote quote={data.quote} />
             </div>
           </div>
 
         </div>
 
-        {/* System Activity & Main Characters Live / Day / Month Section */}
-        <div className="mt-8">
+        {/* System Activity & Main Characters Live Telemetry */}
+        <div className="mt-4">
           <SystemActivityCard onOpenManifest={() => setIsManifestOpen(true)} />
         </div>
       </main>

@@ -22,6 +22,10 @@ export interface ProgressMetrics {
   month_name: string;
   month_progress_percent: number;
   day_progress_percent: number;
+  age_progress_percent?: number;
+  current_age_year?: number;
+  next_age_year?: number;
+  days_until_next_birthday?: number;
 }
 
 export interface Question {

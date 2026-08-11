@@ -133,13 +133,13 @@ export default function TimelineConfigBar({
   return (
     <div className="w-full">
       {/* Top Quick Status & Config Bar */}
-      <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/80 p-3.5 sm:p-4 backdrop-blur-md shadow-2xl transition-all duration-200">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/80 p-2.5 sm:p-3 backdrop-blur-md shadow-2xl transition-all duration-200">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           
           {/* Active Configuration Summary */}
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900/90 text-white shadow-inner">
-              <Calendar className="h-4 w-4 text-amber-400" />
+          <div className="flex items-center gap-2.5 w-full md:w-auto">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900/90 text-white shadow-inner">
+              <Calendar className="h-3.5 w-3.5 text-amber-400" />
             </div>
             
             <div className="flex-1 min-w-0">
@@ -147,26 +147,26 @@ export default function TimelineConfigBar({
                 <span className="text-xs font-semibold uppercase tracking-wider text-neutral-300">
                   Birth Date:
                 </span>
-                <span className="text-sm font-bold text-white font-ticker">
+                <span className="text-xs sm:text-sm font-bold text-white font-ticker">
                   {formatDateDisplay(birthDate)}
                 </span>
-                <span className="inline-flex items-center rounded-full bg-neutral-900 border border-neutral-800 px-2 py-0.5 text-[10px] font-mono text-amber-300">
+                <span className="inline-flex items-center rounded-full bg-neutral-900 border border-neutral-800 px-2 py-0.5 text-[9px] font-mono text-amber-300">
                   {ageYears} yrs old
                 </span>
               </div>
 
-              <div className="flex items-center gap-3 text-[11px] text-neutral-400 font-mono mt-0.5">
+              <div className="flex items-center gap-2.5 text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5">
                 <span className="flex items-center gap-1">
-                  <HeartPulse className="h-3 w-3 text-rose-500/80" />
+                  <HeartPulse className="h-2.5 w-2.5 text-rose-500/80" />
                   Target: <strong className="text-neutral-200">{expectedLife} yrs</strong>
                   {!isCustomExpectancyEnabled && (
-                    <span className="text-[10px] text-neutral-500 ml-0.5">(Default)</span>
+                    <span className="text-[9px] text-neutral-500 ml-0.5">(Default)</span>
                   )}
                 </span>
                 <span className="text-neutral-600">•</span>
                 <span className="flex items-center gap-1 text-emerald-400/90">
-                  <ShieldCheck className="h-3 w-3" />
-                  {justSaved ? "Saved to Frontend Cache" : "Cached in Browser"}
+                  <ShieldCheck className="h-2.5 w-2.5" />
+                  {justSaved ? "Saved" : "Cached"}
                 </span>
               </div>
             </div>
@@ -177,18 +177,18 @@ export default function TimelineConfigBar({
             <button
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition border ${
+              className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition border ${
                 isExpanded 
-                  ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.15)]" 
+                  ? "bg-white text-black border-white shadow-[0_0_12px_rgba(255,255,255,0.15)]" 
                   : "bg-neutral-900/90 text-neutral-200 border-neutral-800 hover:border-neutral-700 hover:text-white"
               }`}
             >
-              <Sliders className="h-3.5 w-3.5" />
-              <span>{isExpanded ? "Close Settings" : "Settings"}</span>
+              <Sliders className="h-3 w-3" />
+              <span>{isExpanded ? "Close" : "Change Date / Expectancy"}</span>
               {isExpanded ? (
-                <ChevronUp className="h-3.5 w-3.5" />
+                <ChevronUp className="h-3 w-3" />
               ) : (
-                <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />
+                <ChevronDown className="h-3 w-3 text-neutral-400" />
               )}
             </button>
           </div>

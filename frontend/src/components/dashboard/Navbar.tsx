@@ -25,13 +25,13 @@ export default function Navbar({ onOpenManifest }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-800/60 bg-black/80 backdrop-blur-md transition-all">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-4 sm:gap-6">
-          <Link href="/" className="group flex items-center gap-3 transition">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-800 bg-neutral-950 text-neutral-200 transition group-hover:border-neutral-700">
-              <Compass className="h-4 w-4 text-white transition-transform group-hover:rotate-45 duration-300" />
+      <div className="mx-auto flex h-14 max-w-[1536px] 2xl:max-w-[1640px] items-center justify-between px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3 sm:gap-5">
+          <Link href="/" className="group flex items-center gap-2.5 transition">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-neutral-800 bg-neutral-950 text-neutral-200 transition group-hover:border-neutral-700">
+              <Compass className="h-3.5 w-3.5 text-white transition-transform group-hover:rotate-45 duration-300" />
             </div>
-            <span className="text-sm font-medium tracking-widest text-neutral-300 uppercase transition group-hover:text-white hidden xs:inline-block">
+            <span className="text-xs font-semibold tracking-widest text-neutral-300 uppercase transition group-hover:text-white hidden xs:inline-block">
               Memento Mori
             </span>
           </Link>
@@ -39,29 +39,30 @@ export default function Navbar({ onOpenManifest }: NavbarProps) {
           {onOpenManifest && (
             <button
               onClick={onOpenManifest}
-              className="flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300 hover:border-amber-500 hover:bg-amber-500/20 hover:text-amber-200 transition shadow-[0_0_15px_rgba(245,158,11,0.15)]"
+              className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-300 hover:border-amber-500/60 hover:bg-amber-500/20 transition shadow-[0_0_12px_rgba(245,158,11,0.12)]"
             >
-              <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
-              <span>Who is Main Character?</span>
+              <Sparkles className="h-3 w-3 text-amber-400 animate-pulse" />
+              <span className="hidden sm:inline">Who is Main Character?</span>
+              <span className="sm:hidden">Manifesto</span>
             </button>
           )}
         </div>
 
-        <nav className="flex items-center gap-3 sm:gap-4 text-xs font-medium tracking-wide">
+        <nav className="flex items-center gap-2 sm:gap-3 text-xs font-medium tracking-wide">
           {isAuthenticated ? (
             <>
               <Link
                 href="/profile"
-                className="flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950 px-3.5 py-1.5 text-neutral-300 hover:border-neutral-700 hover:text-white transition"
+                className="flex items-center gap-1.5 rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1 text-neutral-300 hover:border-neutral-700 hover:text-white transition text-xs"
               >
-                <Settings className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Life Expectancy</span>
+                <Settings className="h-3 w-3" />
+                <span className="hidden sm:inline">Settings</span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 rounded-full border border-transparent px-3 py-1.5 text-neutral-400 hover:text-neutral-200 transition"
+                className="flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-neutral-400 hover:text-neutral-200 transition text-xs"
               >
-                <LogOut className="h-3.5 w-3.5" />
+                <LogOut className="h-3 w-3" />
                 <span>Logout</span>
               </button>
             </>
@@ -69,13 +70,13 @@ export default function Navbar({ onOpenManifest }: NavbarProps) {
             <>
               <Link
                 href="/login"
-                className="text-neutral-400 hover:text-white transition px-2 py-1"
+                className="text-neutral-400 hover:text-white transition px-2 py-1 text-xs"
               >
                 Sign In
               </Link>
               <Link
                 href="/register"
-                className="rounded-full bg-white px-4 py-1.5 font-semibold text-black hover:bg-neutral-200 transition"
+                className="rounded-full bg-white px-3.5 py-1 text-xs font-bold text-black hover:bg-neutral-200 transition"
               >
                 Get Started
               </Link>

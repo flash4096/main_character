@@ -60,9 +60,9 @@ export default function SystemActivityCard({ onOpenManifest }: { onOpenManifest:
   const [activeTab, setActiveTab] = useState<"live" | "today" | "month">("live");
 
   return (
-    <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-5 backdrop-blur-md shadow-2xl flex flex-col gap-4">
+    <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3.5 sm:p-4 backdrop-blur-md shadow-2xl flex flex-col gap-3">
       {/* Top Banner & Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-neutral-900 pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 border-b border-neutral-900 pb-2.5">
         <div>
           <div className="flex items-center gap-2 text-xs uppercase tracking-widest font-semibold text-amber-400">
             <span className="relative flex h-2 w-2">
@@ -71,78 +71,78 @@ export default function SystemActivityCard({ onOpenManifest }: { onOpenManifest:
             </span>
             <span>Main Character Network</span>
           </div>
-          <h3 className="text-lg font-semibold text-white tracking-tight mt-0.5">
+          <h3 className="text-sm sm:text-base font-semibold text-white tracking-tight mt-0.5">
             System & Temporal Milestones
           </h3>
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center rounded-xl bg-neutral-900/90 p-1 border border-neutral-800 text-xs">
+        <div className="flex items-center rounded-xl bg-neutral-900/90 p-0.5 border border-neutral-800 text-xs">
           <button
             onClick={() => setActiveTab("live")}
-            className={`px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded-lg transition font-medium flex items-center gap-1.5 ${
               activeTab === "live"
                 ? "bg-neutral-800 text-white shadow-sm"
                 : "text-neutral-400 hover:text-neutral-200"
             }`}
           >
-            <Activity className="h-3.5 w-3.5 text-amber-400" />
-            <span>Live Now</span>
+            <Activity className="h-3 w-3 text-amber-400" />
+            <span>Live</span>
           </button>
 
           <button
             onClick={() => setActiveTab("today")}
-            className={`px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded-lg transition font-medium flex items-center gap-1.5 ${
               activeTab === "today"
                 ? "bg-neutral-800 text-white shadow-sm"
                 : "text-neutral-400 hover:text-neutral-200"
             }`}
           >
-            <Calendar className="h-3.5 w-3.5 text-amber-400" />
-            <span>This Day</span>
+            <Calendar className="h-3 w-3 text-amber-400" />
+            <span>Day</span>
           </button>
 
           <button
             onClick={() => setActiveTab("month")}
-            className={`px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded-lg transition font-medium flex items-center gap-1.5 ${
               activeTab === "month"
                 ? "bg-neutral-800 text-white shadow-sm"
                 : "text-neutral-400 hover:text-neutral-200"
             }`}
           >
-            <Flame className="h-3.5 w-3.5 text-amber-400" />
-            <span>This Month</span>
+            <Flame className="h-3 w-3 text-amber-400" />
+            <span>Month</span>
           </button>
         </div>
       </div>
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-2.5">
           <div className="flex items-center justify-between text-neutral-400 text-xs font-mono">
             <span>Live in System</span>
-            <Users className="h-3.5 w-3.5 text-emerald-400" />
+            <Users className="h-3 w-3 text-emerald-400" />
           </div>
-          <div className="text-xl font-bold text-white mt-1">1,428</div>
-          <div className="text-[11px] text-neutral-400 mt-0.5">Active Main Characters online</div>
+          <div className="text-base sm:text-lg font-bold text-white mt-0.5">1,428</div>
+          <div className="text-[10px] text-neutral-400">Active online</div>
         </div>
 
-        <div className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-3.5">
+        <div className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-2.5">
           <div className="flex items-center justify-between text-neutral-400 text-xs font-mono">
             <span>This Day</span>
-            <CheckCircle2 className="h-3.5 w-3.5 text-amber-400" />
+            <CheckCircle2 className="h-3 w-3 text-amber-400" />
           </div>
-          <div className="text-xl font-bold text-white mt-1">4,820</div>
-          <div className="text-[11px] text-neutral-400 mt-0.5">Missions authored today</div>
+          <div className="text-base sm:text-lg font-bold text-white mt-0.5">4,820</div>
+          <div className="text-[10px] text-neutral-400">Missions authored</div>
         </div>
 
-        <div className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-3.5">
+        <div className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-2.5">
           <div className="flex items-center justify-between text-neutral-400 text-xs font-mono">
             <span>This Month</span>
-            <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+            <Sparkles className="h-3 w-3 text-amber-300" />
           </div>
-          <div className="text-xl font-bold text-white mt-1">124,500</div>
-          <div className="text-[11px] text-neutral-400 mt-0.5">Courageous choices logged</div>
+          <div className="text-base sm:text-lg font-bold text-white mt-0.5">124,500</div>
+          <div className="text-[10px] text-neutral-400">Choices logged</div>
         </div>
       </div>
 
@@ -151,33 +151,33 @@ export default function SystemActivityCard({ onOpenManifest }: { onOpenManifest:
         {activeTab === "live" && (
           <motion.div
             key="live"
-            initial={{ opacity: 0, y: 4 }}
+            initial={{ opacity: 0, y: 3 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="space-y-2 pt-1"
+            exit={{ opacity: 0, y: -3 }}
+            className="space-y-1.5 pt-0.5"
           >
-            <div className="flex items-center justify-between text-xs text-neutral-400 font-mono px-1">
+            <div className="flex items-center justify-between text-[11px] text-neutral-400 font-mono px-1">
               <span>Recent Main Character Actions</span>
-              <span className="text-amber-400/90 font-semibold">Real-time Stream</span>
+              <span className="text-amber-400/90 font-semibold">Live Stream</span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {MOCK_ACTIVITIES.map((act) => (
                 <div
                   key={act.id}
-                  className="flex items-center justify-between rounded-xl border border-neutral-900 bg-neutral-900/30 p-3 text-xs hover:border-neutral-800 transition"
+                  className="flex items-center justify-between rounded-xl border border-neutral-900 bg-neutral-900/30 p-2 text-xs hover:border-neutral-800 transition"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />
-                    <div>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0" />
+                    <div className="truncate">
                       <span className="font-semibold text-white">{act.author}</span>
-                      <span className="text-neutral-400 ml-2 font-light">{act.action}</span>
+                      <span className="text-neutral-400 ml-2 font-light text-[11px]">{act.action}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0 text-neutral-400 font-mono text-[11px]">
-                    <span className="bg-neutral-800/80 px-2 py-0.5 rounded-md text-amber-300">
-                      {act.streak}d streak
+                  <div className="flex items-center gap-1.5 shrink-0 text-neutral-400 font-mono text-[10px] ml-2">
+                    <span className="bg-neutral-800/80 px-1.5 py-0.5 rounded text-amber-300">
+                      {act.streak}d
                     </span>
                     <span>{act.timeAgo}</span>
                   </div>

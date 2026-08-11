@@ -289,9 +289,46 @@ export function calculateRemainingLife(
 }
 
 /**
- * Calculates current Year / Month / Day progress percentages.
+ * Calculates current Year / Month / Day & Age progress percentages.
  */
-export function calculateTimeProgress(now?: Date): ProgressMetrics {
+export function calculateAgeProgress(
+  birthDateStr?: string | null,
+  now?: Date
+): {
+  current_age_year: number;
+  next_age_year: number;
+  age_progress_percent: number;
+  days_until_next_birthday: number;
+} {
+  const nowDt = now || new Date();
+  const { year: bYear, month: bMonth, day: bDay } = parseBirthDateParts(birthDateStr);
+
+  let lastBdayYear = nowDt.getFullYear();
+  const thisYearBday = new Date(lastBdayYear, bMonth, bDay, 0, 0, 0, 0);
+
+  if (nowDt.getTime() < thisYearBday.getTime()) {
+    lastBdayYear -= 1;
+  }
+
+  const lastBday = new Date(lastBdayYear, bMonth, bDay, 0, 0, 0, 0);
+  const nextBday = new Date(lastBdayYear + 1, bMonth, bDay, 0, 0, 0, 0);
+
+  const totalMs = nextBday.getTime() - lastBday.getTime();
+  const elapsedMs = Math.max(0, nowDt.getTime() - lastBday.getTime());
+  const percent = Number(Math.min(100, Math.max(0, (elapsedMs / totalMs) * 100)).toFixed(2));
+  const daysLeft = Math.max(0, Math.ceil((nextBday.getTime() - nowDt.getTime()) / (86400 * 1000)));
+  const currentAge = lastBdayYear - bYear;
+  const nextAge = currentAge + 1;
+
+  return {
+    current_age_year: currentAge,
+    next_age_year: nextAge,
+    age_progress_percent: percent,
+    days_until_next_birthday: daysLeft,
+  };
+}
+
+export function calculateTimeProgress(birthDateStr?: string | null, now?: Date): ProgressMetrics {
   const nowDt = now || new Date();
   const year = nowDt.getFullYear();
 
@@ -299,7 +336,7 @@ export function calculateTimeProgress(now?: Date): ProgressMetrics {
   const startOfYear = new Date(year, 0, 1, 0, 0, 0, 0).getTime();
   const endOfYear = new Date(year + 1, 0, 1, 0, 0, 0, 0).getTime();
   const year_progress_percent = Number(
-    Math.min(100, Math.max(0, ((nowDt.getTime() - startOfYear) / (endOfYear - startOfYear)) * 100)).toFixed(4)
+    Math.min(100, Math.max(0, ((nowDt.getTime() - startOfYear) / (endOfYear - startOfYear)) * 100)).toFixed(2)
   );
 
   // 2. Month Progress
@@ -307,36 +344,28 @@ export function calculateTimeProgress(now?: Date): ProgressMetrics {
   const startOfMonth = new Date(year, month, 1, 0, 0, 0, 0).getTime();
   const endOfMonth = new Date(year, month + 1, 1, 0, 0, 0, 0).getTime();
   const month_progress_percent = Number(
-    Math.min(100, Math.max(0, ((nowDt.getTime() - startOfMonth) / (endOfMonth - startOfMonth)) * 100)).toFixed(4)
+    Math.min(100, Math.max(0, ((nowDt.getTime() - startOfMonth) / (endOfMonth - startOfMonth)) * 100)).toFixed(2)
   );
 
   // 3. Day Progress
   const startOfDay = new Date(year, month, nowDt.getDate(), 0, 0, 0, 0).getTime();
   const day_progress_percent = Number(
-    Math.min(100, Math.max(0, ((nowDt.getTime() - startOfDay) / (86400 * 1000)) * 100)).toFixed(4)
+    Math.min(100, Math.max(0, ((nowDt.getTime() - startOfDay) / (86400 * 1000)) * 100)).toFixed(2)
   );
 
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  // 4. Age Progress
+  const ageProg = calculateAgeProgress(birthDateStr, nowDt);
 
   return {
     year,
     year_progress_percent,
-    month_name: monthNames[month],
+    month_name: MONTH_NAMES[month] || "August",
     month_progress_percent,
     day_progress_percent,
+    age_progress_percent: ageProg.age_progress_percent,
+    current_age_year: ageProg.current_age_year,
+    next_age_year: ageProg.next_age_year,
+    days_until_next_birthday: ageProg.days_until_next_birthday,
   };
 }
 
@@ -355,7 +384,7 @@ export function computeFullDashboard(
     activeExpectancy,
     now
   );
-  const progress = calculateTimeProgress(now);
+  const progress = calculateTimeProgress(activeBirth, now);
 
   return {
     birth_date: activeBirth,

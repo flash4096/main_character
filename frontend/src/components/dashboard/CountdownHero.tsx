@@ -56,25 +56,25 @@ export default function CountdownHero({
   const msFormatted = String(msFraction).padStart(3, "0");
 
   return (
-    <section className="relative flex flex-col items-center justify-center text-center p-2">
+    <section className="relative flex flex-col items-center justify-center text-center p-1">
       {/* Label Badge: Time Remaining */}
       <motion.div
-        initial={{ opacity: 0, y: -6 }}
+        initial={{ opacity: 0, y: -4 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="mb-2 inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950/90 px-3 py-0.5 text-[10px] uppercase tracking-widest text-neutral-400 font-mono"
+        transition={{ duration: 0.3 }}
+        className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-neutral-800 bg-neutral-950/90 px-2.5 py-0.5 text-[9px] uppercase tracking-widest text-neutral-400 font-mono"
       >
         <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-ping" />
         Time Remaining
       </motion.div>
 
       {/* Heartbeat Ticker Display with Proportional Non-Overflow Sizing */}
-      <div className="relative py-1 w-full overflow-hidden">
+      <div className="relative py-0.5 w-full overflow-hidden">
         {isGiftNow ? (
           <motion.h1
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-2xl sm:text-3xl font-extralight tracking-tight text-white leading-snug"
+            className="text-xl sm:text-2xl font-extralight tracking-tight text-white leading-snug"
           >
             {giftMessage}
           </motion.h1>
@@ -83,17 +83,17 @@ export default function CountdownHero({
             {/* Perfectly scaled non-overflowing text */}
             <motion.div
               animate={controls}
-              className="flex items-baseline justify-center font-ticker memento-glow text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-none select-none my-1 whitespace-nowrap"
+              className="flex items-baseline justify-center font-ticker memento-glow text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-none select-none my-0.5 whitespace-nowrap"
             >
               <span>{formatNumberWithCommas(integerSeconds)}</span>
-              <span className="text-rose-500 font-mono text-base sm:text-xl lg:text-2xl ml-1 font-semibold">
+              <span className="text-rose-500 font-mono text-sm sm:text-lg lg:text-xl ml-1 font-bold">
                 .{msFormatted}
               </span>
             </motion.div>
 
-            <div className="flex items-center gap-1.5 mt-1.5">
+            <div className="flex items-center gap-1.5 mt-1">
               <span className="h-1 w-1 rounded-full bg-rose-500 animate-pulse" />
-              <span className="text-[10px] font-mono tracking-widest uppercase text-neutral-400">
+              <span className="text-[9px] font-mono tracking-widest uppercase text-neutral-400">
                 Seconds & Milliseconds Remaining
               </span>
             </div>

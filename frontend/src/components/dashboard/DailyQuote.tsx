@@ -13,26 +13,26 @@ export default function DailyQuote({ quote }: DailyQuoteProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.3 }}
       className="flex flex-col justify-between h-full"
     >
-      <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-400 font-semibold mb-3">
-        <QuoteIcon className="h-4 w-4 text-white" />
+      <div className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-neutral-300 font-semibold mb-2">
+        <QuoteIcon className="h-3.5 w-3.5 text-amber-400" />
         <span>Daily Wisdom</span>
       </div>
 
-      <p className="text-base sm:text-lg font-light italic text-neutral-200 leading-relaxed my-2">
+      <p className="text-sm sm:text-base font-light italic text-neutral-200 leading-relaxed my-1.5">
         &ldquo;{quote.quote}&rdquo;
       </p>
 
-      <div className="mt-4 flex items-center justify-between border-t border-neutral-900 pt-3">
+      <div className="mt-2.5 flex items-center justify-between border-t border-neutral-900 pt-2">
         <span className="text-xs font-semibold text-white tracking-wide">
           — {quote.author}
         </span>
         {quote.source && (
-          <span className="text-[11px] text-neutral-400 font-mono tracking-wider">
+          <span className="text-[10px] text-neutral-400 font-mono tracking-wider">
             {quote.source}
           </span>
         )}
