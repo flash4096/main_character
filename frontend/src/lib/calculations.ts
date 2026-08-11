@@ -11,8 +11,10 @@ const LEGACY_CACHE_KEY_BIRTH_DATE = "memento_user_birth_date";
 const LEGACY_CACHE_KEY_LIFE_EXPECTANCY = "memento_user_life_expectancy";
 
 /**
- * Normalizes any date string (e.g. "08/11/2002", "2002-08-11", "2002/08/11", "11/08/2002")
+ * Normalizes any date string (e.g. "08/11/2002", "08.11.2002", "2002-11-08", "2002/11/08")
  * into standard ISO "YYYY-MM-DD" format.
+ *
+ * Convention: "08/11/2002" or "08.11.2002" is 8th of November, 2002 (DD/MM/YYYY).
  */
 export function normalizeDateIso(input?: string | null): string {
   if (!input) return DEFAULT_BIRTH_DATE;
@@ -27,27 +29,37 @@ export function normalizeDateIso(input?: string | null): string {
     return `${y}-${m}-${d}`;
   }
 
-  // 2. Match MM/DD/YYYY or DD/MM/YYYY or MM-DD-YYYY
-  const mdyMatch = str.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
-  if (mdyMatch) {
-    const first = Number(mdyMatch[1]);
-    const second = Number(mdyMatch[2]);
-    const year = mdyMatch[3];
+  // 2. Match DD.MM.YYYY (strictly European / Russian standard with dot separator)
+  const dotMatch = str.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (dotMatch) {
+    const d = String(Number(dotMatch[1])).padStart(2, "0");
+    const m = String(Number(dotMatch[2])).padStart(2, "0");
+    const y = dotMatch[3];
+    return `${y}-${m}-${d}`;
+  }
+
+  // 3. Match DD/MM/YYYY or MM/DD/YYYY with slash or hyphen
+  const dmyMatch = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if (dmyMatch) {
+    const first = Number(dmyMatch[1]);
+    const second = Number(dmyMatch[2]);
+    const year = dmyMatch[3];
     let month: string;
     let day: string;
-    if (first > 12) {
-      // DD/MM/YYYY
-      day = String(first).padStart(2, "0");
-      month = String(second).padStart(2, "0");
-    } else {
-      // MM/DD/YYYY
+
+    if (second > 12) {
+      // MM/DD/YYYY (e.g. 11/25/2002)
       month = String(first).padStart(2, "0");
       day = String(second).padStart(2, "0");
+    } else {
+      // DD/MM/YYYY standard (e.g. 08/11/2002 -> 8 Nov 2002, or 25/11/2002 -> 25 Nov 2002)
+      day = String(first).padStart(2, "0");
+      month = String(second).padStart(2, "0");
     }
     return `${year}-${month}-${day}`;
   }
 
-  // 3. Fallback to Date parser
+  // 4. Fallback to Date parser
   const parsed = new Date(str);
   if (!isNaN(parsed.getTime())) {
     const y = parsed.getFullYear();

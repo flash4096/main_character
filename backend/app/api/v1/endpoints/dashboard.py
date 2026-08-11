@@ -36,23 +36,35 @@ def parse_flexible_date(date_str: Optional[str]) -> Optional[date]:
     if not date_str:
         return None
     s = date_str.strip()
+    # 1. YYYY-MM-DD
     ymd = re.match(r"^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})", s)
     if ymd:
         try:
             return date(int(ymd.group(1)), int(ymd.group(2)), int(ymd.group(3)))
         except ValueError:
             pass
-    mdy = re.match(r"^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})", s)
-    if mdy:
-        first, second, year = int(mdy.group(1)), int(mdy.group(2)), int(mdy.group(3))
-        if first > 12:
+    # 2. DD.MM.YYYY
+    dot_dmy = re.match(r"^(\d{1,2})\.(\d{1,2})\.(\d{4})", s)
+    if dot_dmy:
+        d, m, y = int(dot_dmy.group(1)), int(dot_dmy.group(2)), int(dot_dmy.group(3))
+        try:
+            return date(y, m, d)
+        except ValueError:
+            pass
+    # 3. DD/MM/YYYY or MM/DD/YYYY
+    dmy = re.match(r"^(\d{1,2})[-/](\d{1,2})[-/](\d{4})", s)
+    if dmy:
+        first, second, year = int(dmy.group(1)), int(dmy.group(2)), int(dmy.group(3))
+        if second > 12:
+            # MM/DD/YYYY
             try:
-                return date(year, second, first)
+                return date(year, first, second)
             except ValueError:
                 pass
         else:
+            # DD/MM/YYYY standard (e.g. 08/11/2002 -> 8 Nov 2002)
             try:
-                return date(year, first, second)
+                return date(year, second, first)
             except ValueError:
                 pass
     try:

@@ -88,7 +88,7 @@ export default function TimelineConfigBar({
     { label: "1995", date: "1995-06-15" },
     { label: "1998", date: "1998-01-01" },
     { label: "2000", date: "2000-01-01" },
-    { label: "2002", date: "2002-08-11" },
+    { label: "2002", date: "2002-11-08" },
     { label: "2005", date: "2005-01-01" },
   ];
 
@@ -185,9 +185,14 @@ export default function TimelineConfigBar({
                 
                 {/* 1. Direct Birth Date Input (5 cols) */}
                 <div className="lg:col-span-5 space-y-1.5">
-                  <label className="block text-xs font-medium uppercase tracking-wider text-neutral-300">
-                    Date of Birth:
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-medium uppercase tracking-wider text-neutral-300">
+                      Date of Birth:
+                    </label>
+                    <span className="text-[11px] font-mono text-amber-300/90">
+                      {formatDateDisplay(birthDate)} ({ageYears} yrs)
+                    </span>
+                  </div>
                   <div className="relative flex items-center">
                     <input
                       type="date"
