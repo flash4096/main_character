@@ -250,13 +250,40 @@ export function calculateRemainingLife(
 
   if (remainingSeconds <= 0) {
     return {
-      remaining_life: { years: 0, months: 0, days: 0, total_days: 0 },
+      remaining_life: {
+        years: 0,
+        months: 0,
+        days: 0,
+        total_days: 0,
+        total_weeks: 0,
+        total_months: 0,
+        total_years_decimal: 0,
+        weeks_lived: 0,
+        total_weeks_in_life: 0,
+        summers_remaining: 0,
+        weekends_remaining: 0,
+        waking_hours_remaining: 0,
+      },
       remaining_seconds: 0,
       is_gift: true,
     };
   }
 
-  const total_days = Math.floor(remainingMs / (86400 * 1000));
+  const birthDate = new Date(birthYear, birthMonth, birthDay, 0, 0, 0, 0);
+  const livedMs = Math.max(0, nowDt.getTime() - birthDate.getTime());
+  const total_days = Math.max(0, Math.floor(remainingMs / (86400 * 1000)));
+  const total_days_lived = Math.max(0, Math.floor(livedMs / (86400 * 1000)));
+
+  const total_weeks = Math.max(0, Math.floor(total_days / 7));
+  const weeks_lived = Math.max(0, Math.floor(total_days_lived / 7));
+  const total_weeks_in_life = total_weeks + weeks_lived;
+
+  const total_months = Math.max(0, Math.floor(total_days / 30.4375));
+  const total_years_decimal = Number(Math.max(0, total_days / 365.25).toFixed(1));
+  const summers_remaining = Math.max(0, targetDeathDate.getFullYear() - nowDt.getFullYear());
+  const weekends_remaining = total_weeks;
+  const waking_hours_remaining = total_days * 16; // 16 waking hours per day
+
   let rem_years = targetDeathDate.getFullYear() - nowDt.getFullYear();
   let rem_months = targetDeathDate.getMonth() - nowDt.getMonth();
   let rem_days = targetDeathDate.getDate() - nowDt.getDate();
@@ -282,6 +309,14 @@ export function calculateRemainingLife(
       months: Math.max(0, rem_months),
       days: Math.max(0, rem_days),
       total_days: Math.max(0, total_days),
+      total_weeks,
+      total_months,
+      total_years_decimal,
+      weeks_lived,
+      total_weeks_in_life,
+      summers_remaining,
+      weekends_remaining,
+      waking_hours_remaining,
     },
     remaining_seconds: Number(remainingSeconds.toFixed(2)),
     is_gift: false,

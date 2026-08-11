@@ -14,6 +14,14 @@ export interface RemainingLife {
   months: number;
   days: number;
   total_days: number;
+  total_weeks?: number;
+  total_months?: number;
+  total_years_decimal?: number;
+  weeks_lived?: number;
+  total_weeks_in_life?: number;
+  summers_remaining?: number;
+  weekends_remaining?: number;
+  waking_hours_remaining?: number;
 }
 
 export interface ProgressMetrics {
