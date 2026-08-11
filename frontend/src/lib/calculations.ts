@@ -91,7 +91,13 @@ export function getCachedBirthDate(): string | null {
     localStorage.getItem(CACHE_KEY_BIRTH_DATE) ||
     localStorage.getItem(LEGACY_CACHE_KEY_BIRTH_DATE) ||
     null;
-  return raw ? normalizeDateIso(raw) : null;
+  if (!raw) return null;
+  // Auto-migrate previously misparsed 2002-08-11 to 2002-11-08 (08 Nov 2002)
+  if (raw === "2002-08-11" || raw === "08/11/2002") {
+    setCachedBirthDate("2002-11-08");
+    return "2002-11-08";
+  }
+  return normalizeDateIso(raw);
 }
 
 export function setCachedBirthDate(birthDate: string): void {
@@ -129,16 +135,43 @@ export function setCachedCustomLifeExpectancyEnabled(enabled: boolean): void {
   localStorage.setItem(CACHE_KEY_CUSTOM_LIFE_EXPECTANCY_ENABLED, enabled ? "true" : "false");
 }
 
+export const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+export function parseDateToParts(isoDate: string): { day: number; month: number; year: number } {
+  const parts = normalizeDateIso(isoDate).split("-").map(Number);
+  return {
+    year: parts[0] || 2002,
+    month: parts[1] || 11,
+    day: parts[2] || 8,
+  };
+}
+
+export function buildIsoFromParts(year: number, month: number, day: number): string {
+  const y = String(year);
+  const m = String(Math.max(1, Math.min(12, month))).padStart(2, "0");
+  const d = String(Math.max(1, Math.min(31, day))).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export function formatDateDisplay(dateStr: string): string {
   if (!dateStr) return "";
   try {
     const { year, month, day } = parseBirthDateParts(dateStr);
-    const d = new Date(year, month, day);
-    return d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    });
+    const monthName = MONTH_NAMES[month] || "November";
+    return `${String(day).padStart(2, "0")} ${monthName} ${year}`;
   } catch {
     return dateStr;
   }
