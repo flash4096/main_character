@@ -23,6 +23,7 @@ import {
   DEFAULT_BIRTH_DATE, 
   DEFAULT_LIFE_EXPECTANCY 
 } from "@/lib/calculations";
+import { useTheme } from "@/context/ThemeContext";
 
 interface TimelineConfigBarProps {
   currentBirthDate: string;
@@ -35,6 +36,7 @@ export default function TimelineConfigBar({
   currentExpectedLife,
   onUpdate,
 }: TimelineConfigBarProps) {
+  const { theme, setTheme } = useTheme();
   const [birthDate, setBirthDate] = useState<string>(normalizeDateIso(currentBirthDate || DEFAULT_BIRTH_DATE));
   const [expectedLife, setExpectedLife] = useState<number>(currentExpectedLife || DEFAULT_LIFE_EXPECTANCY);
   const [isCustomExpectancyEnabled, setIsCustomExpectancyEnabled] = useState<boolean>(false);
@@ -308,26 +310,60 @@ export default function TimelineConfigBar({
                   )}
                 </div>
 
-                {/* 3. Actions / Reset / Done (3 cols) */}
-                <div className="lg:col-span-3 flex items-center gap-2 justify-end pt-2 md:pt-0">
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="flex items-center gap-1.5 rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-2.5 text-xs font-medium text-neutral-400 hover:text-white hover:border-neutral-700 transition"
-                    title="Reset to default"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    <span>Reset</span>
-                  </button>
+                {/* 3. Theme & Actions (3 cols) */}
+                <div className="lg:col-span-3 flex flex-col justify-between gap-3 h-full">
+                  {/* Theme Selector */}
+                  <div className="space-y-1.5 rounded-xl border border-neutral-800/80 bg-neutral-900/40 p-2.5">
+                    <span className="text-[10px] uppercase font-mono tracking-wider text-neutral-400 block">
+                      Visual Theme Mode:
+                    </span>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setTheme("classic")}
+                        className={`rounded-lg py-1.5 px-2 text-[11px] font-mono transition border text-center flex items-center justify-center gap-1 ${
+                          theme === "classic"
+                            ? "bg-white text-black border-white font-bold shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                            : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+                        }`}
+                      >
+                        <span>🌙 Classic</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTheme("matrix")}
+                        className={`rounded-lg py-1.5 px-2 text-[11px] font-mono transition border text-center flex items-center justify-center gap-1 ${
+                          theme === "matrix"
+                            ? "bg-emerald-950 border-[#00ff41] text-[#00ff41] font-bold shadow-[0_0_15px_rgba(0,255,65,0.4)]"
+                            : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-[#00ff41]"
+                        }`}
+                      >
+                        <span>🟢 Matrix</span>
+                      </button>
+                    </div>
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setIsExpanded(false)}
-                    className="flex items-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-black hover:bg-neutral-200 transition shadow-lg flex-1 sm:flex-initial justify-center"
-                  >
-                    <Check className="h-4 w-4" />
-                    <span>Apply & Save</span>
-                  </button>
+                  {/* Buttons */}
+                  <div className="flex items-center gap-2 justify-end pt-1">
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      className="flex items-center gap-1.5 rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:border-neutral-700 transition"
+                      title="Reset to default"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      <span>Reset</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsExpanded(false)}
+                      className="flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-black hover:bg-neutral-200 transition shadow-lg flex-1 sm:flex-initial justify-center"
+                    >
+                      <Check className="h-4 w-4" />
+                      <span>Done</span>
+                    </button>
+                  </div>
                 </div>
 
               </div>
@@ -336,9 +372,9 @@ export default function TimelineConfigBar({
               <div className="mt-3.5 flex items-center justify-between text-[11px] text-neutral-500 font-mono border-t border-neutral-900 pt-2.5">
                 <span className="flex items-center gap-1.5">
                   <Sparkles className="h-3 w-3 text-amber-400" />
-                  Your birth date is stored securely and privately in your browser&apos;s local cache.
+                  Your settings & Matrix Neo theme preference are preserved in browser cache.
                 </span>
-                <span>Real-time Live Engine</span>
+                <span>Real-time Engine</span>
               </div>
             </motion.div>
           )}

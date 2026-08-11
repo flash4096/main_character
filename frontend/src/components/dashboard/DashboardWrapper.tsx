@@ -12,6 +12,7 @@ import DailyMemento from "./DailyMemento";
 import DailyQuote from "./DailyQuote";
 import SystemActivityCard from "./SystemActivityCard";
 import MainCharacterModal from "./MainCharacterModal";
+import MatrixRainBackground from "./MatrixRainBackground";
 import { DashboardData } from "@/types";
 import { 
   getCachedBirthDate, 
@@ -98,10 +99,12 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
   }, [data]);
 
   return (
-    <>
-      <Navbar onOpenManifest={() => setIsManifestOpen(true)} />
+    <div className="relative min-h-screen">
+      <MatrixRainBackground />
+      <div className="relative z-10">
+        <Navbar onOpenManifest={() => setIsManifestOpen(true)} />
 
-      <main className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <main className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Prominent Direct Date & Expectancy Configuration Bar */}
         <TimelineConfigBar
           currentBirthDate={birthDate}
@@ -180,6 +183,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
         isOpen={isManifestOpen}
         onClose={() => setIsManifestOpen(false)}
       />
-    </>
+      </div>
+    </div>
   );
 }

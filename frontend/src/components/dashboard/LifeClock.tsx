@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useSpring, useTransform } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 
 interface LifeClockProps {
   birthDateIso: string;
@@ -16,6 +17,7 @@ export default function LifeClock({
   currentAgeYears,
   remainingLifeYears,
 }: LifeClockProps) {
+  const { theme } = useTheme();
   const [livedPercentage, setLivedPercentage] = useState<number>(0);
 
   useEffect(() => {
@@ -55,6 +57,9 @@ export default function LifeClock({
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (livedPercentage / 100) * circumference;
 
+  const trackColor = theme === "matrix" ? "#03260f" : "#18181b";
+  const progressColor = theme === "matrix" ? "#00ff41" : "#ffffff";
+
   return (
     <motion.section
       initial={{ opacity: 0, scale: 0.95 }}
@@ -79,7 +84,7 @@ export default function LifeClock({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="#18181b"
+            stroke={trackColor}
             strokeWidth={strokeWidth}
             fill="transparent"
           />
@@ -88,7 +93,7 @@ export default function LifeClock({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="#ffffff"
+            stroke={progressColor}
             strokeWidth={strokeWidth}
             strokeDasharray={circumference}
             initial={{ strokeDashoffset: circumference }}
