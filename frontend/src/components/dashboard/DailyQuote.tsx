@@ -28,7 +28,7 @@ export default function DailyQuote({ quote }: DailyQuoteProps) {
               href={quote.authorUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-amber-300 hover:text-amber-200 underline decoration-amber-500/40 underline-offset-2 transition-colors"
+              className="text-sky-400 hover:text-sky-300 underline decoration-sky-500/40 underline-offset-2 transition-colors"
             >
               {quote.author}
             </a>
