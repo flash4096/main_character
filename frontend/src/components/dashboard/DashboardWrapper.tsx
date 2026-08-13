@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import Navbar from "./Navbar";
 import TimelineConfigBar from "./TimelineConfigBar";
 import LifeClock from "./LifeClock";
@@ -26,6 +27,23 @@ import {
 } from "@/lib/calculations";
 import { getDashboardData } from "@/lib/api";
 
+const WAVE_STAGGER_SECONDS = 0.13;
+
+const waveVariants = {
+  hidden: { opacity: 0, y: 16, scale: 0.97 },
+  visible: (waveIndex: number) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring" as const,
+      bounce: 0.25,
+      duration: 0.5,
+      delay: waveIndex * WAVE_STAGGER_SECONDS,
+    },
+  }),
+};
+
 interface DashboardWrapperProps {
   initialData: DashboardData;
 }
@@ -39,6 +57,15 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
   const [isManifestOpen, setIsManifestOpen] = useState<boolean>(false);
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean>(false);
+  const [shouldAnimateReveal, setShouldAnimateReveal] = useState<boolean>(false);
+
+  // Reset the reveal flag once the longest wave's animation has finished playing,
+  // so it doesn't replay on unrelated re-renders (e.g. live ticking data updates).
+  useEffect(() => {
+    if (!shouldAnimateReveal) return;
+    const timer = setTimeout(() => setShouldAnimateReveal(false), 1500);
+    return () => clearTimeout(timer);
+  }, [shouldAnimateReveal]);
 
   // Initialize from frontend cache (localStorage) on client mount
   useEffect(() => {
@@ -80,6 +107,9 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
 
   // Handler when user edits date or life expectancy
   const handleTimelineUpdate = useCallback((newBirthDate: string, newExpectedLife: number) => {
+    if (newBirthDate !== birthDate) {
+      setShouldAnimateReveal(true);
+    }
     setBirthDate(newBirthDate);
     setExpectedLifeYears(newExpectedLife);
 
@@ -101,10 +131,11 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
         }));
       })
       .catch(() => {});
-  }, [data]);
+  }, [data, birthDate]);
 
   const handleOnboardingSubmit = useCallback((birthDateIso: string) => {
     setNeedsOnboarding(false);
+    setShouldAnimateReveal(true);
     handleTimelineUpdate(birthDateIso, expectedLifeYears);
   }, [handleTimelineUpdate, expectedLifeYears]);
 
@@ -112,23 +143,43 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
     <>
       <OnboardingModal isOpen={needsOnboarding} onSubmit={handleOnboardingSubmit} />
 
-      <Navbar onOpenManifest={() => setIsManifestOpen(true)} />
+      <motion.div
+        initial={shouldAnimateReveal ? "hidden" : false}
+        animate="visible"
+        custom={0}
+        variants={waveVariants}
+      >
+        <Navbar onOpenManifest={() => setIsManifestOpen(true)} />
+      </motion.div>
 
       <main className="space-y-3.5 sm:space-y-4 max-w-[1536px] 2xl:max-w-[1640px] mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
-        {/* Prominent Direct Date & Expectancy Configuration Bar */}
-        <TimelineConfigBar
-          currentBirthDate={birthDate}
-          currentExpectedLife={expectedLifeYears}
-          onUpdate={handleTimelineUpdate}
-        />
+        {/* Prominent Direct Date & Expectancy Configuration Bar (Wave 1) */}
+        <motion.div
+          initial={shouldAnimateReveal ? "hidden" : false}
+          animate="visible"
+          custom={0}
+          variants={waveVariants}
+        >
+          <TimelineConfigBar
+            currentBirthDate={birthDate}
+            currentExpectedLife={expectedLifeYears}
+            onUpdate={handleTimelineUpdate}
+          />
+        </motion.div>
 
         {/* High-Density Command Center (3-Column Grid) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3.5 sm:gap-4 items-stretch">
           
           {/* Column 1: Life Progress & Time Lived (4 Cols) */}
           <div className="md:col-span-1 lg:col-span-4 flex flex-col gap-3.5">
-            {/* Life Clock (Circular Donut Chart) */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 backdrop-blur-md shadow-2xl flex flex-col justify-center">
+            {/* Life Clock (Circular Donut Chart) — Wave 2 */}
+            <motion.div
+              initial={shouldAnimateReveal ? "hidden" : false}
+              animate="visible"
+              custom={1}
+              variants={waveVariants}
+              className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 backdrop-blur-md shadow-2xl flex flex-col justify-center"
+            >
               <LifeClock
                 key={`clock-${birthDate}-${expectedLifeYears}`}
                 birthDateIso={data.birth_date}
@@ -136,63 +187,107 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
                 currentAgeYears={data.current_age.years}
                 remainingLifeYears={data.remaining_life.years}
               />
-            </div>
+            </motion.div>
 
-            {/* Time You Have Lived (Exact Elapsed Breakdown) */}
-            <CurrentAgeCard
-              key={`age-${birthDate}`}
-              birthDateIso={data.birth_date}
-              initialAge={data.current_age}
-            />
+            {/* Time You Have Lived (Exact Elapsed Breakdown) — Wave 4 */}
+            <motion.div
+              initial={shouldAnimateReveal ? "hidden" : false}
+              animate="visible"
+              custom={3}
+              variants={waveVariants}
+            >
+              <CurrentAgeCard
+                key={`age-${birthDate}`}
+                birthDateIso={data.birth_date}
+                initialAge={data.current_age}
+              />
+            </motion.div>
           </div>
 
           {/* Column 2: Time Remaining Horizon & Countdown (4 Cols) */}
           <div className="md:col-span-1 lg:col-span-4 flex flex-col gap-3.5">
-            {/* Countdown Hero (Heartbeat Ticker with Milliseconds) */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 backdrop-blur-md shadow-2xl">
+            {/* Countdown Hero (Heartbeat Ticker with Milliseconds) — Wave 3 */}
+            <motion.div
+              initial={shouldAnimateReveal ? "hidden" : false}
+              animate="visible"
+              custom={2}
+              variants={waveVariants}
+              className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 backdrop-blur-md shadow-2xl"
+            >
               <CountdownHero
                 key={`hero-${birthDate}-${expectedLifeYears}-${data.remaining_seconds}`}
                 initialRemainingSeconds={data.remaining_seconds}
                 isGift={data.is_gift}
                 giftMessage={data.gift_message}
               />
-            </div>
+            </motion.div>
 
-            {/* Time You Have Left (Remaining Horizon Breakdown) */}
-            <RemainingLifeCard
-              key={`remaining-${birthDate}-${expectedLifeYears}`}
-              remainingLife={data.remaining_life}
-              expectedLifeYears={data.expected_life_years}
-            />
+            {/* Time You Have Left (Remaining Horizon Breakdown) — Wave 4 */}
+            <motion.div
+              initial={shouldAnimateReveal ? "hidden" : false}
+              animate="visible"
+              custom={3}
+              variants={waveVariants}
+            >
+              <RemainingLifeCard
+                key={`remaining-${birthDate}-${expectedLifeYears}`}
+                remainingLife={data.remaining_life}
+                expectedLifeYears={data.expected_life_years}
+              />
+            </motion.div>
 
-            {/* Daily Wisdom Quote */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl">
+            {/* Daily Wisdom Quote — Wave 5 */}
+            <motion.div
+              initial={shouldAnimateReveal ? "hidden" : false}
+              animate="visible"
+              custom={4}
+              variants={waveVariants}
+              className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl"
+            >
               <DailyQuote quote={data.quote} />
-            </div>
+            </motion.div>
           </div>
 
           {/* Column 3: Temporal & Age Progress + Philosophical Wisdom (4 Cols) */}
           <div className="md:col-span-2 lg:col-span-4 flex flex-col gap-3.5">
-            {/* Temporal Milestones (Age Progress & Year / Month / Day Progress Bars) */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl">
+            {/* Temporal Milestones (Age Progress & Year / Month / Day Progress Bars) — Wave 6 */}
+            <motion.div
+              initial={shouldAnimateReveal ? "hidden" : false}
+              animate="visible"
+              custom={5}
+              variants={waveVariants}
+              className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl"
+            >
               <ProgressSection
                 initialProgress={data.progress}
                 birthDateIso={data.birth_date}
               />
-            </div>
+            </motion.div>
 
-            {/* Special Existential Question */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 backdrop-blur-md shadow-2xl flex-1 flex flex-col justify-center">
+            {/* Special Existential Question — Wave 7 */}
+            <motion.div
+              initial={shouldAnimateReveal ? "hidden" : false}
+              animate="visible"
+              custom={6}
+              variants={waveVariants}
+              className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 backdrop-blur-md shadow-2xl flex-1 flex flex-col justify-center"
+            >
               <DailyMemento question={data.question} />
-            </div>
+            </motion.div>
           </div>
 
         </div>
 
-        {/* System Activity & Main Characters Live Telemetry */}
-        <div className="mt-4">
+        {/* System Activity & Main Characters Live Telemetry — Wave 8 */}
+        <motion.div
+          initial={shouldAnimateReveal ? "hidden" : false}
+          animate="visible"
+          custom={7}
+          variants={waveVariants}
+          className="mt-4"
+        >
           <SystemActivityCard onOpenManifest={() => setIsManifestOpen(true)} />
-        </div>
+        </motion.div>
       </main>
 
       <MainCharacterModal
