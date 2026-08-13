@@ -28,6 +28,9 @@ import {
 import { getDashboardData } from "@/lib/api";
 
 const WAVE_STAGGER_SECONDS = 0.13;
+const WAVE_COUNT = 8;
+// Must match the `duration: 0.5` in waveVariants.visible's transition below.
+const SPRING_DURATION_SECONDS = 0.5;
 
 const waveVariants = {
   hidden: { opacity: 0, y: 16, scale: 0.97 },
@@ -58,12 +61,15 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean>(false);
   const [shouldAnimateReveal, setShouldAnimateReveal] = useState<boolean>(false);
+  const [revealToken, setRevealToken] = useState<number>(0);
 
   // Reset the reveal flag once the longest wave's animation has finished playing,
   // so it doesn't replay on unrelated re-renders (e.g. live ticking data updates).
   useEffect(() => {
     if (!shouldAnimateReveal) return;
-    const timer = setTimeout(() => setShouldAnimateReveal(false), 1500);
+    const timeoutMs =
+      ((WAVE_COUNT - 1) * WAVE_STAGGER_SECONDS + SPRING_DURATION_SECONDS + 0.1) * 1000;
+    const timer = setTimeout(() => setShouldAnimateReveal(false), timeoutMs);
     return () => clearTimeout(timer);
   }, [shouldAnimateReveal]);
 
@@ -109,6 +115,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
   const handleTimelineUpdate = useCallback((newBirthDate: string, newExpectedLife: number) => {
     if (newBirthDate !== birthDate) {
       setShouldAnimateReveal(true);
+      setRevealToken((prev) => prev + 1);
     }
     setBirthDate(newBirthDate);
     setExpectedLifeYears(newExpectedLife);
@@ -136,6 +143,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
   const handleOnboardingSubmit = useCallback((birthDateIso: string) => {
     setNeedsOnboarding(false);
     setShouldAnimateReveal(true);
+    setRevealToken((prev) => prev + 1);
     handleTimelineUpdate(birthDateIso, expectedLifeYears);
   }, [handleTimelineUpdate, expectedLifeYears]);
 
@@ -144,6 +152,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
       <OnboardingModal isOpen={needsOnboarding} onSubmit={handleOnboardingSubmit} />
 
       <motion.div
+        key={`wave-navbar-${revealToken}`}
         initial={shouldAnimateReveal ? "hidden" : false}
         animate="visible"
         custom={0}
@@ -155,6 +164,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
       <main className="space-y-3.5 sm:space-y-4 max-w-[1536px] 2xl:max-w-[1640px] mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
         {/* Prominent Direct Date & Expectancy Configuration Bar (Wave 1) */}
         <motion.div
+          key={`wave-timeline-${revealToken}`}
           initial={shouldAnimateReveal ? "hidden" : false}
           animate="visible"
           custom={0}
@@ -174,6 +184,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
           <div className="md:col-span-1 lg:col-span-4 flex flex-col gap-3.5">
             {/* Life Clock (Circular Donut Chart) — Wave 2 */}
             <motion.div
+              key={`wave-clock-${revealToken}`}
               initial={shouldAnimateReveal ? "hidden" : false}
               animate="visible"
               custom={1}
@@ -191,6 +202,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
 
             {/* Time You Have Lived (Exact Elapsed Breakdown) — Wave 4 */}
             <motion.div
+              key={`wave-age-${revealToken}`}
               initial={shouldAnimateReveal ? "hidden" : false}
               animate="visible"
               custom={3}
@@ -208,6 +220,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
           <div className="md:col-span-1 lg:col-span-4 flex flex-col gap-3.5">
             {/* Countdown Hero (Heartbeat Ticker with Milliseconds) — Wave 3 */}
             <motion.div
+              key={`wave-countdown-${revealToken}`}
               initial={shouldAnimateReveal ? "hidden" : false}
               animate="visible"
               custom={2}
@@ -224,6 +237,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
 
             {/* Time You Have Left (Remaining Horizon Breakdown) — Wave 4 */}
             <motion.div
+              key={`wave-remaining-${revealToken}`}
               initial={shouldAnimateReveal ? "hidden" : false}
               animate="visible"
               custom={3}
@@ -238,6 +252,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
 
             {/* Daily Wisdom Quote — Wave 5 */}
             <motion.div
+              key={`wave-quote-${revealToken}`}
               initial={shouldAnimateReveal ? "hidden" : false}
               animate="visible"
               custom={4}
@@ -252,6 +267,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
           <div className="md:col-span-2 lg:col-span-4 flex flex-col gap-3.5">
             {/* Temporal Milestones (Age Progress & Year / Month / Day Progress Bars) — Wave 6 */}
             <motion.div
+              key={`wave-progress-${revealToken}`}
               initial={shouldAnimateReveal ? "hidden" : false}
               animate="visible"
               custom={5}
@@ -266,6 +282,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
 
             {/* Special Existential Question — Wave 7 */}
             <motion.div
+              key={`wave-memento-${revealToken}`}
               initial={shouldAnimateReveal ? "hidden" : false}
               animate="visible"
               custom={6}
@@ -280,6 +297,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
 
         {/* System Activity & Main Characters Live Telemetry — Wave 8 */}
         <motion.div
+          key={`wave-activity-${revealToken}`}
           initial={shouldAnimateReveal ? "hidden" : false}
           animate="visible"
           custom={7}
