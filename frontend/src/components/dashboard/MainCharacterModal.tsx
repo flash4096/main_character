@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, X, Compass, ShieldCheck, Target, Flame, ArrowRight } from "lucide-react";
+import { Sparkles, X, Compass, ShieldCheck, Target, Flame, ArrowRight, Gamepad2 } from "lucide-react";
 
 interface MainCharacterModalProps {
   isOpen: boolean;
@@ -98,6 +98,13 @@ export default function MainCharacterModal({ isOpen, onClose }: MainCharacterMod
                   <ArrowRight className="h-5 w-5 text-amber-400/80 shrink-0 mt-0.5" />
                   <p>
                     It is the path of the person who walks toward fear instead of away from it. The person who chooses courage over comfort, experience over hesitation, and lives a truly authentic life.
+                  </p>
+                </div>
+
+                <div className="pt-3.5 flex items-start gap-3">
+                  <Gamepad2 className="h-5 w-5 text-amber-400/80 shrink-0 mt-0.5" />
+                  <p>
+                    Where you treat everything as a game. Nothing is that serious — that lightness is what lets you take bigger swings, shrug off losses, and keep playing until you win.
                   </p>
                 </div>
               </div>
