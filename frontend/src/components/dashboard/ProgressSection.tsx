@@ -11,6 +11,51 @@ interface ProgressSectionProps {
   birthDateIso?: string;
 }
 
+function MiniDonut({ percentage }: { percentage: number }) {
+  const size = 60;
+  const strokeWidth = 6;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.min(100, Math.max(0, percentage));
+  const strokeDashoffset = circumference - (clamped / 100) * circumference;
+
+  return (
+    <div className="relative flex items-center justify-center shrink-0">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
+        {/* Remaining (blue) — full track */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#3b82f6"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          opacity={0.35}
+        />
+        {/* Spent (red) — animated arc */}
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#f43f5e"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          strokeLinecap="round"
+          fill="transparent"
+        />
+      </svg>
+      <div className="absolute flex items-center justify-center">
+        <span className="text-[10px] font-bold font-ticker text-white">
+          {clamped.toFixed(0)}%
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function ProgressSection({ initialProgress, birthDateIso }: ProgressSectionProps) {
   const [progress, setProgress] = useState<ProgressMetrics>(initialProgress);
 
@@ -30,27 +75,9 @@ export default function ProgressSection({ initialProgress, birthDateIso }: Progr
   const daysLeft = progress.days_until_next_birthday ?? 0;
 
   const milestoneItems = [
-    {
-      label: `Year ${progress.year}`,
-      percentage: progress.year_progress_percent,
-      color: "from-blue-500 to-indigo-500",
-      track: "bg-blue-500/10",
-      accent: "text-blue-400",
-    },
-    {
-      label: `${progress.month_name}`,
-      percentage: progress.month_progress_percent,
-      color: "from-emerald-500 to-teal-400",
-      track: "bg-emerald-500/10",
-      accent: "text-emerald-400",
-    },
-    {
-      label: "Today (24h)",
-      percentage: progress.day_progress_percent,
-      color: "from-amber-400 to-orange-500",
-      track: "bg-amber-500/10",
-      accent: "text-amber-300",
-    },
+    { label: `Year ${progress.year}`, percentage: progress.year_progress_percent },
+    { label: `${progress.month_name}`, percentage: progress.month_progress_percent },
+    { label: "Today (24h)", percentage: progress.day_progress_percent },
   ];
 
   return (
@@ -115,25 +142,20 @@ export default function ProgressSection({ initialProgress, birthDateIso }: Progr
 
       {/* 2. Calendar Milestones (Year / Month / Day) in compact grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-0.5">
-        {milestoneItems.map((item, idx) => (
+        {milestoneItems.map((item) => (
           <div
             key={item.label}
-            className="rounded-xl border border-neutral-800/80 bg-neutral-900/40 p-2.5 space-y-1.5"
+            className="rounded-xl border border-neutral-800/80 bg-neutral-900/40 p-2.5 flex flex-col items-center gap-1.5"
           >
-            <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-neutral-300 truncate">{item.label}</span>
-              <span className={`font-bold font-ticker ${item.accent}`}>
-                {item.percentage.toFixed(1)}%
+            <span className="text-[11px] font-mono text-neutral-300 truncate">{item.label}</span>
+            <MiniDonut percentage={item.percentage} />
+            <div className="flex items-center gap-2 text-[9px] font-mono text-neutral-500">
+              <span className="flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-rose-500" /> Spent
               </span>
-            </div>
-
-            <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-neutral-950 border border-neutral-800/60">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${item.percentage}%` }}
-                transition={{ duration: 0.8, ease: "easeOut", delay: idx * 0.05 }}
-                className={`h-full bg-gradient-to-r ${item.color} rounded-full`}
-              />
+              <span className="flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500/60" /> Left
+              </span>
             </div>
           </div>
         ))}
