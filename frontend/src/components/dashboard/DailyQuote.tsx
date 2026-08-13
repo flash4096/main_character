@@ -16,19 +16,12 @@ export default function DailyQuote({ quote }: DailyQuoteProps) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col justify-between h-full"
+      className="flex items-start gap-2"
     >
-      <div className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-neutral-300 font-semibold mb-2">
-        <QuoteIcon className="h-3.5 w-3.5 text-amber-400" />
-        <span>Daily Wisdom</span>
-      </div>
-
-      <p className="text-sm sm:text-base font-light italic text-amber-100 leading-relaxed my-1.5">
-        &ldquo;{quote.quote}&rdquo;
-      </p>
-
-      <div className="mt-2.5 flex items-center justify-between border-t border-amber-500/20 pt-2">
-        <span className="text-xs font-semibold text-amber-300 tracking-wide">
+      <QuoteIcon className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+      <p className="text-sm sm:text-base font-medium italic text-white leading-snug">
+        &ldquo;{quote.quote}&rdquo;{" "}
+        <span className="not-italic font-semibold text-amber-300">
           —{" "}
           {quote.authorUrl ? (
             <a
@@ -43,12 +36,7 @@ export default function DailyQuote({ quote }: DailyQuoteProps) {
             quote.author
           )}
         </span>
-        {quote.source && (
-          <span className="text-[10px] text-neutral-400 font-mono tracking-wider">
-            {quote.source}
-          </span>
-        )}
-      </div>
+      </p>
     </motion.div>
   );
 }

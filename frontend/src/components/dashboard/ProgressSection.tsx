@@ -12,9 +12,7 @@ interface ProgressSectionProps {
 }
 
 export default function ProgressSection({ initialProgress, birthDateIso }: ProgressSectionProps) {
-  const [progress, setProgress] = useState<ProgressMetrics>(
-    calculateTimeProgress(birthDateIso) || initialProgress
-  );
+  const [progress, setProgress] = useState<ProgressMetrics>(initialProgress);
 
   useEffect(() => {
     const updateProgress = () => {

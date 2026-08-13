@@ -27,6 +27,16 @@ import {
 } from "@/lib/calculations";
 import { getDashboardData } from "@/lib/api";
 
+// Pinned quote for the dashboard — always Castaneda, independent of the
+// backend's randomly rotating `data.quote`.
+const CASTANEDA_QUOTE = {
+  id: 0,
+  quote: "A warrior is never in a hurry, and never idle.",
+  author: "Carlos Castaneda",
+  authorUrl: "https://en.wikipedia.org/wiki/Carlos_Castaneda",
+  source: "Journey to Ixtlan",
+};
+
 const WAVE_STAGGER_SECONDS = 0.13;
 const WAVE_COUNT = 8;
 // Must match the `duration: 0.5` in waveVariants.visible's transition below.
@@ -218,6 +228,18 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
 
           {/* Column 2: Time Remaining Horizon & Countdown (4 Cols) */}
           <div className="md:col-span-1 lg:col-span-4 flex flex-col gap-3.5">
+            {/* Framing Quote — sits directly above the countdown, before "TIME REMAINING" (Wave 2) */}
+            <motion.div
+              key={`wave-castaneda-${revealToken}`}
+              initial={shouldAnimateReveal ? "hidden" : false}
+              animate="visible"
+              custom={2}
+              variants={waveVariants}
+              className="rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-neutral-950/80 to-amber-500/15 px-3.5 py-2.5 backdrop-blur-md shadow-lg shadow-amber-500/10"
+            >
+              <DailyQuote quote={CASTANEDA_QUOTE} />
+            </motion.div>
+
             {/* Countdown Hero (Heartbeat Ticker with Milliseconds) — Wave 3 */}
             <motion.div
               key={`wave-countdown-${revealToken}`}
@@ -233,18 +255,6 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
                 isGift={data.is_gift}
                 giftMessage={data.gift_message}
               />
-            </motion.div>
-
-            {/* Daily Wisdom Quote — Wave 3, right under the countdown to soften the moment */}
-            <motion.div
-              key={`wave-quote-${revealToken}`}
-              initial={shouldAnimateReveal ? "hidden" : false}
-              animate="visible"
-              custom={2}
-              variants={waveVariants}
-              className="rounded-2xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 to-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl shadow-amber-500/10"
-            >
-              <DailyQuote quote={data.quote} />
             </motion.div>
 
             {/* Time You Have Left (Remaining Horizon Breakdown) — Wave 4 */}
@@ -280,7 +290,7 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
               />
             </motion.div>
 
-            {/* Special Existential Question — Wave 7 */}
+            {/* Existential Question — Wave 7 */}
             <motion.div
               key={`wave-memento-${revealToken}`}
               initial={shouldAnimateReveal ? "hidden" : false}

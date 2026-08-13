@@ -49,7 +49,7 @@ export default function DailyMemento({ question: initialQuestion }: DailyMemento
       <div className="flex items-center justify-between border-b border-neutral-900 pb-2 mb-2.5">
         <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-neutral-300 font-semibold">
           <HelpCircle className="h-3.5 w-3.5 text-amber-400" />
-          <span>Special Question For You</span>
+          <span>Existential Question For You</span>
         </div>
         <button
           onClick={fetchNextQuestion}
