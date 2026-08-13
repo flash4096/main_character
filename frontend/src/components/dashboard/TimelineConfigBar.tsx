@@ -14,18 +14,25 @@ import {
   ChevronDown, 
   ChevronUp 
 } from "lucide-react";
-import { 
-  formatDateDisplay, 
-  calculateCurrentAge, 
+import {
+  formatDateDisplay,
+  calculateCurrentAge,
   normalizeDateIso,
   parseDateToParts,
-  buildIsoFromParts,
-  MONTH_NAMES,
   getCachedCustomLifeExpectancyEnabled,
   setCachedCustomLifeExpectancyEnabled,
-  DEFAULT_BIRTH_DATE, 
-  DEFAULT_LIFE_EXPECTANCY 
+  DEFAULT_BIRTH_DATE,
+  DEFAULT_LIFE_EXPECTANCY
 } from "@/lib/calculations";
+
+// Formats raw digit input into "DD.MM.YYYY" as the user types
+function formatDateInput(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 8);
+  const day = digits.slice(0, 2);
+  const month = digits.slice(2, 4);
+  const year = digits.slice(4, 8);
+  return [day, month, year].filter(Boolean).join(".");
+}
 
 interface TimelineConfigBarProps {
   currentBirthDate: string;
@@ -43,7 +50,7 @@ export default function TimelineConfigBar({
   const [isCustomExpectancyEnabled, setIsCustomExpectancyEnabled] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [justSaved, setJustSaved] = useState<boolean>(false);
-  const [directTextDate, setDirectTextDate] = useState<string>("");
+  const [dateText, setDateText] = useState<string>("");
 
   useEffect(() => {
     if (currentBirthDate) {
@@ -56,7 +63,14 @@ export default function TimelineConfigBar({
 
   const currentAgeObj = calculateCurrentAge(birthDate);
   const ageYears = currentAgeObj.years;
-  const { day: bDay, month: bMonth, year: bYear } = parseDateToParts(birthDate);
+
+  // Keep the text field in sync with the active birth date (e.g. after preset/reset)
+  useEffect(() => {
+    const { day, month, year } = parseDateToParts(birthDate);
+    setDateText(
+      `${String(day).padStart(2, "0")}.${String(month).padStart(2, "0")}.${year}`
+    );
+  }, [birthDate]);
 
   const handleDateChange = (newDate: string) => {
     if (!newDate) return;
@@ -66,18 +80,14 @@ export default function TimelineConfigBar({
     triggerSaveFeedback();
   };
 
-  const handleSegmentChange = (year: number, month: number, day: number) => {
-    const iso = buildIsoFromParts(year, month, day);
-    handleDateChange(iso);
-  };
-
-  const handleDirectTextInput = (text: string) => {
-    setDirectTextDate(text);
-    if (text.length >= 8) {
-      const normalized = normalizeDateIso(text);
-      if (normalized && normalized !== DEFAULT_BIRTH_DATE) {
-        handleDateChange(normalized);
-      }
+  const handleDateTextChange = (raw: string) => {
+    const digits = raw.replace(/\D/g, "").slice(0, 8);
+    const formatted = [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 8)]
+      .filter(Boolean)
+      .join(".");
+    setDateText(formatted);
+    if (digits.length === 8) {
+      handleDateChange(formatted);
     }
   };
 
@@ -125,10 +135,6 @@ export default function TimelineConfigBar({
     onUpdate(DEFAULT_BIRTH_DATE, DEFAULT_LIFE_EXPECTANCY);
     triggerSaveFeedback();
   };
-
-  // Days in month
-  const daysInCurrentMonth = new Date(bYear, bMonth, 0).getDate();
-  const dayOptions = Array.from({ length: daysInCurrentMonth }, (_, i) => i + 1);
 
   return (
     <div className="w-full">
@@ -207,70 +213,25 @@ export default function TimelineConfigBar({
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
                 
-                {/* 1. Unambiguous Segmented Date Pickers (6 cols) */}
+                {/* 1. Direct Numeric Date Entry (6 cols) */}
                 <div className="lg:col-span-6 space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-300">
-                      Date of Birth (Day / Month / Year):
+                      Date of Birth (DD.MM.YYYY):
                     </label>
                     <span className="text-xs font-bold font-mono text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-500/30">
                       {formatDateDisplay(birthDate)} ({ageYears} yrs)
                     </span>
                   </div>
 
-                  {/* 3 Explicit Dropdown Segments */}
-                  <div className="grid grid-cols-12 gap-2">
-                    {/* Day Select (3 cols) */}
-                    <div className="col-span-3">
-                      <label className="block text-[10px] text-neutral-500 font-mono uppercase mb-0.5">
-                        Day
-                      </label>
-                      <select
-                        value={bDay}
-                        onChange={(e) => handleSegmentChange(bYear, bMonth, Number(e.target.value))}
-                        className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-2 py-2 text-xs font-bold font-ticker text-white shadow-inner focus:border-amber-400 focus:outline-none"
-                      >
-                        {dayOptions.map((d) => (
-                          <option key={d} value={d}>
-                            {String(d).padStart(2, "0")}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Month Select (5 cols) */}
-                    <div className="col-span-5">
-                      <label className="block text-[10px] text-neutral-500 font-mono uppercase mb-0.5">
-                        Month
-                      </label>
-                      <select
-                        value={bMonth}
-                        onChange={(e) => handleSegmentChange(bYear, Number(e.target.value), bDay)}
-                        className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-2 py-2 text-xs font-bold font-ticker text-white shadow-inner focus:border-amber-400 focus:outline-none"
-                      >
-                        {MONTH_NAMES.map((mName, idx) => (
-                          <option key={mName} value={idx + 1}>
-                            {String(idx + 1).padStart(2, "0")} – {mName}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Year Input (4 cols) */}
-                    <div className="col-span-4">
-                      <label className="block text-[10px] text-neutral-500 font-mono uppercase mb-0.5">
-                        Year
-                      </label>
-                      <input
-                        type="number"
-                        min={1900}
-                        max={new Date().getFullYear()}
-                        value={bYear}
-                        onChange={(e) => handleSegmentChange(Number(e.target.value), bMonth, bDay)}
-                        className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-2.5 py-1.5 text-xs font-bold font-ticker text-white shadow-inner focus:border-amber-400 focus:outline-none"
-                      />
-                    </div>
-                  </div>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="08.11.2002"
+                    value={dateText}
+                    onChange={(e) => handleDateTextChange(e.target.value)}
+                    className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2.5 text-sm font-bold font-ticker tracking-wider text-white shadow-inner focus:border-amber-400 focus:outline-none text-center"
+                  />
 
                   {/* Direct Input & Quick Presets */}
                   <div className="flex items-center gap-1.5 pt-1 overflow-x-auto pb-1">

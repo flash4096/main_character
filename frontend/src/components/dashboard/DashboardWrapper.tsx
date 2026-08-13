@@ -12,6 +12,7 @@ import DailyMemento from "./DailyMemento";
 import DailyQuote from "./DailyQuote";
 import SystemActivityCard from "./SystemActivityCard";
 import MainCharacterModal from "./MainCharacterModal";
+import OnboardingModal from "./OnboardingModal";
 import { DashboardData } from "@/types";
 import { 
   getCachedBirthDate, 
@@ -37,11 +38,16 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
   );
   const [isManifestOpen, setIsManifestOpen] = useState<boolean>(false);
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState<boolean>(false);
 
   // Initialize from frontend cache (localStorage) on client mount
   useEffect(() => {
     const cachedBirth = getCachedBirthDate();
     const cachedExpectancy = getCachedLifeExpectancy();
+
+    if (!cachedBirth) {
+      setNeedsOnboarding(true);
+    }
 
     const activeBirth = normalizeDateIso(cachedBirth || initialData.birth_date || DEFAULT_BIRTH_DATE);
     const activeExpectancy = cachedExpectancy || initialData.expected_life_years || DEFAULT_LIFE_EXPECTANCY;
@@ -97,8 +103,15 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
       .catch(() => {});
   }, [data]);
 
+  const handleOnboardingSubmit = useCallback((birthDateIso: string) => {
+    setNeedsOnboarding(false);
+    handleTimelineUpdate(birthDateIso, expectedLifeYears);
+  }, [handleTimelineUpdate, expectedLifeYears]);
+
   return (
     <>
+      <OnboardingModal isOpen={needsOnboarding} onSubmit={handleOnboardingSubmit} />
+
       <Navbar onOpenManifest={() => setIsManifestOpen(true)} />
 
       <main className="space-y-3.5 sm:space-y-4 max-w-[1536px] 2xl:max-w-[1640px] mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
@@ -151,6 +164,11 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
               remainingLife={data.remaining_life}
               expectedLifeYears={data.expected_life_years}
             />
+
+            {/* Daily Wisdom Quote */}
+            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl">
+              <DailyQuote quote={data.quote} />
+            </div>
           </div>
 
           {/* Column 3: Temporal & Age Progress + Philosophical Wisdom (4 Cols) */}
@@ -164,13 +182,8 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
             </div>
 
             {/* Special Existential Question */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 backdrop-blur-md shadow-2xl">
+            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 backdrop-blur-md shadow-2xl flex-1 flex flex-col justify-center">
               <DailyMemento question={data.question} />
-            </div>
-
-            {/* Daily Wisdom Quote */}
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl flex-1 flex flex-col justify-center">
-              <DailyQuote quote={data.quote} />
             </div>
           </div>
 

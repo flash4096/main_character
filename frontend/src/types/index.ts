@@ -46,6 +46,7 @@ export interface Quote {
   id: number;
   quote: string;
   author: string;
+  authorUrl?: string;
   source?: string;
 }
 

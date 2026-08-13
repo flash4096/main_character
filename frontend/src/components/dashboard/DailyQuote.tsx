@@ -29,7 +29,19 @@ export default function DailyQuote({ quote }: DailyQuoteProps) {
 
       <div className="mt-2.5 flex items-center justify-between border-t border-neutral-900 pt-2">
         <span className="text-xs font-semibold text-white tracking-wide">
-          — {quote.author}
+          —{" "}
+          {quote.authorUrl ? (
+            <a
+              href={quote.authorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white hover:text-amber-400 underline decoration-neutral-700 underline-offset-2 transition-colors"
+            >
+              {quote.author}
+            </a>
+          ) : (
+            quote.author
+          )}
         </span>
         {quote.source && (
           <span className="text-[10px] text-neutral-400 font-mono tracking-wider">

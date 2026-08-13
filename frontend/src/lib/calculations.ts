@@ -437,9 +437,10 @@ export function computeFullDashboard(
     },
     quote: existingData?.quote || {
       id: 1,
-      quote: "You could leave life right now. Let that determine what you do and say and think.",
-      author: "Marcus Aurelius",
-      source: "Meditations",
+      quote: "A warrior is never in a hurry, and never idle.",
+      author: "Carlos Castaneda",
+      authorUrl: "https://en.wikipedia.org/wiki/Carlos_Castaneda",
+      source: "Journey to Ixtlan",
     },
   };
 }
