@@ -89,7 +89,8 @@ main-character/
 ├── supabase/
 │   ├── migrations/           # Initial SQL schema
 │   └── seed.sql              # 100 Questions & 100 Quotes SQL seed file
-├── docker-compose.yml        # Multi-container orchestrator (Frontend + Backend + DB)
+├── docker-compose.yml        # Multi-container orchestrator (Frontend + Backend + DB), prod mode by default
+├── docker-compose.dev.yml    # Dev override: hot-reload, bind-mounted source
 ├── .env.example              # Environment variables template
 └── README.md                 # Documentation
 ```
@@ -98,13 +99,19 @@ main-character/
 
 ## 🚀 Quick Start with Docker Compose
 
-Run the full monorepo stack with a single command:
+**Production mode** (built images, no hot-reload):
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
-- **Frontend**: [http://localhost:3000](http://localhost:3000)
+**Dev mode** (bind-mounted source, `uvicorn --reload` + `next dev`, live edits):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+- **Frontend**: [http://localhost:3012](http://localhost:3012)
 - **Backend API**: [http://localhost:8000](http://localhost:8000)
 - **API Interactive Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
 

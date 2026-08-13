@@ -235,6 +235,18 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
               />
             </motion.div>
 
+            {/* Daily Wisdom Quote — Wave 3, right under the countdown to soften the moment */}
+            <motion.div
+              key={`wave-quote-${revealToken}`}
+              initial={shouldAnimateReveal ? "hidden" : false}
+              animate="visible"
+              custom={2}
+              variants={waveVariants}
+              className="rounded-2xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 to-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl shadow-amber-500/10"
+            >
+              <DailyQuote quote={data.quote} />
+            </motion.div>
+
             {/* Time You Have Left (Remaining Horizon Breakdown) — Wave 4 */}
             <motion.div
               key={`wave-remaining-${revealToken}`}
@@ -248,18 +260,6 @@ export default function DashboardWrapper({ initialData }: DashboardWrapperProps)
                 remainingLife={data.remaining_life}
                 expectedLifeYears={data.expected_life_years}
               />
-            </motion.div>
-
-            {/* Daily Wisdom Quote — Wave 5 */}
-            <motion.div
-              key={`wave-quote-${revealToken}`}
-              initial={shouldAnimateReveal ? "hidden" : false}
-              animate="visible"
-              custom={4}
-              variants={waveVariants}
-              className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-3 sm:p-3.5 backdrop-blur-md shadow-2xl"
-            >
-              <DailyQuote quote={data.quote} />
             </motion.div>
           </div>
 

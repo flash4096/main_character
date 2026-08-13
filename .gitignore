@@ -44,6 +44,9 @@ coverage/
 *.env
 !*.env.example
 
+# Local SQLite artifacts from ad-hoc backend runs
+backend/*.db
+
 # Logs
 logs
 *.log

@@ -1,0 +1,25 @@
+# Dev override: hot-reload both services against live source.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# Plain `docker compose up` (no override) still runs the prod images.
+services:
+  backend:
+    build:
+      target: dev
+    volumes:
+      - ./backend:/app
+    restart: "no"
+
+  frontend:
+    build:
+      target: dev
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8001
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    restart: "no"

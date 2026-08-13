@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11-slim AS base
 
 WORKDIR /app
 
@@ -19,4 +19,9 @@ COPY . .
 
 EXPOSE 8000
 
+# Dev target: source is bind-mounted by docker-compose.dev.yml, --reload picks up changes
+FROM base AS dev
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+FROM base AS prod
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

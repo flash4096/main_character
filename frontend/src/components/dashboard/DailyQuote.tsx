@@ -23,19 +23,19 @@ export default function DailyQuote({ quote }: DailyQuoteProps) {
         <span>Daily Wisdom</span>
       </div>
 
-      <p className="text-sm sm:text-base font-light italic text-neutral-200 leading-relaxed my-1.5">
+      <p className="text-sm sm:text-base font-light italic text-amber-100 leading-relaxed my-1.5">
         &ldquo;{quote.quote}&rdquo;
       </p>
 
-      <div className="mt-2.5 flex items-center justify-between border-t border-neutral-900 pt-2">
-        <span className="text-xs font-semibold text-white tracking-wide">
+      <div className="mt-2.5 flex items-center justify-between border-t border-amber-500/20 pt-2">
+        <span className="text-xs font-semibold text-amber-300 tracking-wide">
           —{" "}
           {quote.authorUrl ? (
             <a
               href={quote.authorUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white hover:text-amber-400 underline decoration-neutral-700 underline-offset-2 transition-colors"
+              className="text-amber-300 hover:text-amber-200 underline decoration-amber-500/40 underline-offset-2 transition-colors"
             >
               {quote.author}
             </a>
